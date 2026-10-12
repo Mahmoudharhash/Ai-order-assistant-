@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Daily Grind - Smart Menu</title>
+    <style>
+        /* --- CSS STYLING (Matching your Mockups) --- */
+        :root {
+            --brand-dark: #1A3B32;
+            --brand-cream: #FDFBF7;
+            --brand-orange: #F0A04B;
+            --brand-text: #333333;
+            --brand-gray: #777777;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--brand-cream);
+            color: var(--brand-text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Mobile view */
+            background-color: var(--brand-cream);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            padding-bottom: 40px;
+        }
+        /* Header */
+        header {
+            background-color: var(--brand-dark);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        header p {
+            margin: 5px 0 0 0;
+            font-size: 0.8rem;
+            color: #a8c3b8;
+        }
+        /* Lina Assistant Bubble */
+        .lina-section {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .lina-avatar {
+            width: 60px;
+            height: 60px;
+            background-color: var(--brand-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+        .lina-bubble {
+            background-color: white;
+            padding: 15px;
+            border-radius: 15px;
+            border-bottom-left-radius: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
+            position: relative;
+        }
+        .lina-bubble::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid white;
+            border-left: 10px solid transparent;
+        }
+        /* Filters */
+        .filters-container {
+            background-color: white;
+            margin: 0 20px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        .filter-group label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--brand-dark);
+        }
+        /* Budget Slider */
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--brand-dark);
+        }
+        .budget-value {
+            font-weight: bold;
+            color: var(--brand-orange);
+            font-size: 1.1rem;
+        }
+        /* Tag Checkboxes */
+        .tags-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tag-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--brand-cream);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid #eee;
+        }
+        .tag-checkbox input {
+            accent-color: var(--brand-dark);
+            cursor: pointer;
+        }
+        /* Results */
+        .results-container {
+            padding: 20px;
+        }
+        .results-container h2 {
+            font-size: 1.2rem;
+            color: var(--brand-dark);
+            margin-bottom: 15px;
+        }
+        .item-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--brand-dark);
+            margin: 0;
+        }
+        .item-price {
+            font-weight: bold;
+            color: var(--brand-orange);
+        }
+        .item-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .tag {
+            background-color: #E8F0EC;
+            color: var(--brand-dark);
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        .item-desc {
+            font-size: 0.85rem;
+            color: var(--brand-gray);
+            margin: 0;
+            line-height: 1.4;
+        }
+        .item-action {
+            background-color: var(--brand-dark);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .item-action:hover {
+            background-color: #2a5548;
+        }
+        .no-results {
+            text-align: center;
+            color: var(--brand-gray);
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>The Daily Grind</h1>
+        <p>COFFEE & MORE</p>
+    </header>
+
+    <!-- Lina Assistant -->
+    <div class="lina-section">
+        <div class="lina-avatar">👩‍🍳</div>
+        <div class="lina-bubble" id="lina-message">
+            Hi! I'm Lina. Set your budget and preferences below, and I'll find the perfect order for you!
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-container">
+        <div class="filter-group">
+            <label>Max Budget: <span class="budget-value" id="budget-display">150 EGP</span></label>
+            <input type="range" id="budget-slider" min="30" max="150" value="150" step="5">
+        </div>
+
+        <div class="filter-group">
+            <label>Temperature / Type</label>
+            <select id="temp-select" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #eee; background: var(--brand-cream); font-family: inherit;">
+                <option value="all">All Items</option>
+                <option value="cold">Cold / Iced</option>
+                <option value="hot">Hot</option>
+                <option value="food">Food & Snacks</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Preferences (Optional)</label>
+            <div class="tags-grid">
+                <label class="tag-checkbox"><input type="checkbox" value="No Sugar" class="pref-tag"> No Sugar</label>
+                <label class="tag-checkbox"><input type="checkbox" value="Vegan" class="pref-tag"> Vegan</label>
+                <label class="tag-checkbox"><input type="checkbox" value="Sweet" class="pref-tag"> Sweet</label>
+                <label class="tag-checkbox"><input type="checkbox" value="Low Calorie" class="pref-tag"> Low Calorie</label>
+                <label class="tag-checkbox"><input type="checkbox" value="Snack" class="pref-tag"> Snack</label>
+                <label class="tag-checkbox"><input type="checkbox" value="Strong" class="pref-tag"> Strong</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-container">
+        <h2 id="results-title">Recommended for you</h2>
+        <div id="menu-items"></div>
+    </div>
+</div>
+
+<script>
+    // --- 1. THE MENU DATA ---
+    const menuData = {
+      "brand": { "name": "The Daily Grind", "currency": "EGP", "assistant_name": "Lina" },
+      "menu": [
+        { "id": "item_01", "name": "Iced Americano", "category": "Cold Coffee", "price": 65, "tags": ["No Sugar", "Iced", "Low Calorie", "Vegan"], "description": "Bold espresso poured over cold water and ice for a crisp, smooth taste." },
+        { "id": "item_02", "name": "Iced Matcha Latte", "category": "Cold Drinks", "price": 75, "tags": ["No Sugar", "Iced", "Vegetarian"], "description": "Rich Japanese green tea powder whisked with cold milk over ice." },
+        { "id": "item_03", "name": "Caramel Frappé", "category": "Blended Drinks", "price": 110, "tags": ["Iced", "Creamy", "Sweet"], "description": "Blended coffee drink drizzled with sweet caramel and topped with whipped cream." },
+        { "id": "item_04", "name": "Cold Brew", "category": "Cold Coffee", "price": 115, "tags": ["Iced", "Low Calorie", "Strong", "No Sugar"], "description": "Slow-steeped for 18 hours to unlock a naturally sweet, low-acid coffee taste." },
+        { "id": "item_05", "name": "Spanish Latte", "category": "Hot Coffee", "price": 85, "tags": ["Sweet", "Hot", "Creamy"], "description": "Rich espresso combined with textured steamed milk and sweetened condensed milk." },
+        { "id": "item_06", "name": "Iced Spanish Latte", "category": "Cold Coffee", "price": 95, "tags": ["Sweet", "Iced", "Creamy"], "description": "Espresso mixed with cold milk and sweet condensed milk served over ice." },
+        { "id": "item_07", "name": "Cappuccino", "category": "Hot Coffee", "price": 70, "tags": ["Hot", "Classic", "Vegetarian"], "description": "Equal parts espresso, steamed milk, and thick velvety milk foam." },
+        { "id": "item_08", "name": "Flat White", "category": "Hot Coffee", "price": 75, "tags": ["Hot", "Strong", "Microfoam"], "description": "Double espresso topped with thin microfoam for a smooth coffee-forward taste." },
+        { "id": "item_09", "name": "Vanilla Bean Iced Latte", "category": "Cold Coffee", "price": 90, "tags": ["Iced", "Sweet", "Flavored"], "description": "Chilled espresso and cold milk sweetened with natural vanilla bean syrup." },
+        { "id": "item_10", "name": "Pistachio Mocha", "category": "Hot Coffee", "price": 105, "tags": ["Hot", "Nutty", "Sweet", "Specialty"], "description": "Rich espresso blended with dark chocolate sauce and sweet pistachio cream." },
+        { "id": "item_11", "name": "Peach Iced Tea", "category": "Non-Coffee Beverages", "price": 60, "tags": ["Iced", "Fruity", "Refreshing", "Low Calorie"], "description": "Freshly brewed black tea infused with natural peach puree and ice." },
+        { "id": "item_12", "name": "Berry Hibiscus Cooler", "category": "Non-Coffee Beverages", "price": 65, "tags": ["Iced", "Fruity", "Caffeine-Free", "Vegan"], "description": "Tangy dried hibiscus flowers steeped and blended with fresh forest berries." },
+        { "id": "item_13", "name": "Fresh Passionfruit Lemonade", "category": "Non-Coffee Beverages", "price": 70, "tags": ["Iced", "Sour-Sweet", "Refreshing", "Vegan"], "description": "Freshly squeezed lemon juice combined with tropical passionfruit seeds." },
+        { "id": "item_14", "name": "Butter Croissant", "category": "Bakery & Snacks", "price": 45, "tags": ["Snack", "Pastry", "Vegetarian", "Freshly Baked"], "description": "Flaky, golden-brown French butter croissant baked fresh daily." },
+        { "id": "item_15", "name": "Chocolate Almond Croissant", "category": "Bakery & Snacks", "price": 60, "tags": ["Snack", "Sweet", "Pastry", "Nuts"], "description": "Butter croissant filled with chocolate cream and topped with toasted sliced almonds." },
+        { "id": "item_16", "name": "Triple Fudge Brownie", "category": "Desserts", "price": 65, "tags": ["Sweet", "Chocolate", "Dessert"], "description": "Rich, dense chocolate brownie baked with dark chocolate chunks." },
+        { "id": "item_17", "name": "Blueberry Cheesecake Slice", "category": "Desserts", "price": 85, "tags": ["Sweet", "Creamy", "Dessert"], "description": "Classic New York style baked cheesecake topped with sweet blueberry compote." },
+        { "id": "item_18", "name": "Turkey & Cheddar Panini", "category": "Savory Food", "price": 120, "tags": ["Hot Food", "Savory", "High Protein"], "description": "Smoked turkey breast slices, aged cheddar cheese, and honey mustard pressed in sourdough bread." },
+        { "id": "item_19", "name": "Caprese Sourdough Sandwich", "category": "Savory Food", "price": 110, "tags": ["Savory", "Vegetarian", "Fresh"], "description": "Fresh mozzarella slices, ripe tomatoes, basil pesto, and balsamic glaze on toasted sourdough." },
+        { "id": "item_20", "name": "Oatmeal Cranberry Cookie", "category": "Bakery & Snacks", "price": 40, "tags": ["Snack", "Sweet", "Fiber"], "description": "Chewy whole grain oat cookie packed with tart dried cranberries." }
+      ]
+    };
+
+    // --- 2. DOM ELEMENTS ---
+    const budgetSlider = document.getElementById('budget-slider');
+    const budgetDisplay = document.getElementById('budget-display');
+    const tempSelect = document.getElementById('temp-select');
+    const prefTags = document.querySelectorAll('.pref-tag');
+    const menuContainer = document.getElementById('menu-items');
+    const resultsTitle = document.getElementById('results-title');
+    const linaMessage = document.getElementById('lina-message');
+
+    // --- 3. RENDER FUNCTION ---
+    function renderMenu(items) {
+        menuContainer.innerHTML = '';
+        
+        if (items.length === 0) {
+            menuContainer.innerHTML = `<div class="no-results">No items match your current filters. Try adjusting them!</div>`;
+            return;
+        }
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            
+            // Build tags HTML
+            let tagsHtml = '';
+            item.tags.forEach(tag => {
+                tagsHtml += `<span class="tag">${tag}</span>`;
+            });
+
+            card.innerHTML = `
+                <div class="item-header">
+                    <div>
+                        <h3 class="item-name">${item.name}</h3>
+                        <div class="item-tags">${tagsHtml}</div>
+                    </div>
+                    <div class="item-price">${item.price} EGP</div>
+                </div>
+                <p class="item-desc">${item.description}</p>
+                <button class="item-action">Add to Order</button>
+            `;
+            menuContainer.appendChild(card);
+        });
+    }
+
+    // --- 4. FILTER LOGIC ---
+    function filterMenu() {
+        const maxBudget = parseInt(budgetSlider.value);
+        const tempFilter = tempSelect.value;
+        
+        // Get selected preferences
+        const selectedPrefs = Array.from(prefTags)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        // Filter the menu
+        const filteredItems = menuData.menu.filter(item => {
+            // 1. Budget Check (using base price)
+            if (item.price > maxBudget) return false;
+
+            // 2. Temperature / Type Check
+            if (tempFilter === 'cold' && !item.tags.includes('Iced')) return false;
+            if (tempFilter === 'hot' && !item.tags.includes('Hot')) return false;
+            if (tempFilter === 'food' && !item.tags.includes('Snack') && !item.tags.includes('Savory') && !item.tags.includes('Dessert')) return false;
+
+            // 3. Preference Tags Check (Item must include ALL selected preferences)
+            if (selectedPrefs.length > 0) {
+                const hasAllPrefs = selectedPrefs.every(pref => item.tags.includes(pref));
+                if (!hasAllPrefs) return false;
+            }
+
+            return true;
+        });
+
+        // Update UI
+        renderMenu(filteredItems);
+        updateLinaMessage(filteredItems, maxBudget, selectedPrefs);
+    }
+
+    // --- 5. LINA'S AUTOMATED PERSONALITY ---
+    function updateLinaMessage(items, budget, prefs) {
+        let message = "";
+        
+        if (items.length === 0) {
+            message = `Oh no! I couldn't find anything matching those exact preferences under ${budget} EGP. 😔 Try increasing your budget or removing a preference!`;
+        } else if (items.length === 1) {
+            message = `I found exactly one perfect match for you under ${budget} EGP! Check out the ${items[0].name}.`;
+        } else if (prefs.length > 0) {
+            message = `Great choice! I found ${items.length} options under ${budget} EGP that are ${prefs.join(' & ')}. Here are my top picks!`;
+        } else {
+            message = `Here are ${items.length} refreshing options for you under ${budget} EGP. Let me know if you want to narrow it down!`;
+        }
+
+        linaMessage.innerHTML = message;
+    }
+
+    // --- 6. EVENT LISTENERS ---
+    budgetSlider.addEventListener('input', (e) => {
+        budgetDisplay.textContent = `${e.target.value} EGP`;
+        filterMenu();
+    });
+
+    tempSelect.addEventListener('change', filterMenu);
+    
+    prefTags.forEach(cb => {
+        cb.addEventListener('change', filterMenu);
+    });
+
+    // Initial render
+    filterMenu();
+
+</script>
+</body>
+</html>
