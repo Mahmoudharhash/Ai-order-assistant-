@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Daily Grind | Smart Menu</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <title>Vaya Cafe | Smart Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS STYLING --- */
         :root {
             --brand-dark: #1A3B32;
             --brand-cream: #FDFBF7;
@@ -24,403 +22,191 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            transition: direction 0.3s;
         }
-        /* Mobile App Container */
+        /* RTL Support */
+        html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        html[dir="rtl"] .lina-bubble { border-radius: 18px; border-top-right-radius: 4px; border-top-left-radius: 18px; }
+        html[dir="rtl"] .item-price { margin-left: 0; margin-right: 10px; }
+        html[dir="rtl"] .lina-bubble::before { display: none; }
+
         .app-container {
-            width: 100%;
-            max-width: 480px;
-            background-color: var(--brand-cream);
-            min-height: 100vh;
-            box-shadow: 0 0 30px rgba(0,0,0,0.1);
-            position: relative;
-            padding-bottom: 40px;
-            overflow-x: hidden;
+            width: 100%; max-width: 480px; background-color: var(--brand-cream);
+            min-height: 100vh; box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            position: relative; padding-bottom: 40px; overflow-x: hidden;
         }
         /* Header */
         header {
-            padding: 25px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: var(--brand-cream);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--brand-cream); border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
         }
-        header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            color: var(--brand-dark);
-            margin-bottom: 2px;
-            letter-spacing: 0.5px;
+        .header-logo { text-align: center; flex-grow: 1; }
+        .header-logo h1 {
+            font-family: 'Playfair Display', serif; font-size: 1.5rem;
+            color: var(--brand-dark); margin-bottom: 2px; letter-spacing: 0.5px;
         }
-        header p {
-            font-size: 0.65rem;
-            letter-spacing: 2px;
-            color: var(--brand-gray);
-            text-transform: uppercase;
+        .header-logo p { font-size: 0.6rem; letter-spacing: 2px; color: var(--brand-gray); text-transform: uppercase; }
+        
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .icon-btn {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer;
+            color: var(--brand-dark); position: relative; display: flex; align-items: center; justify-content: center;
         }
-        /* Lina Assistant Section */
-        .lina-section {
-            display: flex;
-            align-items: flex-start;
-            padding: 25px 20px;
-            gap: 15px;
+        .lang-btn { font-size: 0.8rem; font-weight: 700; border: 1px solid var(--brand-dark); padding: 4px 8px; border-radius: 8px; }
+        .cart-badge {
+            position: absolute; top: -5px; right: -8px; background-color: var(--brand-orange);
+            color: white; font-size: 0.6rem; font-weight: bold; width: 16px; height: 16px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
-        .lina-avatar-container {
-            position: relative;
-            flex-shrink: 0;
-        }
+
+        /* Lina Assistant */
+        .lina-section { display: flex; align-items: flex-start; padding: 20px; gap: 15px; }
+        .lina-avatar-container { position: relative; flex-shrink: 0; }
         .lina-avatar {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            background-color: var(--brand-orange);
-            border: 3px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            overflow: hidden;
+            width: 65px; height: 65px; border-radius: 50%; background-color: var(--brand-orange);
+            border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        .lina-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .lina-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .online-dot {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 14px;
-            height: 14px;
-            background-color: #4CAF50;
-            border: 2px solid white;
-            border-radius: 50%;
+            position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px;
+            background-color: #4CAF50; border: 2px solid white; border-radius: 50%;
         }
         .lina-bubble {
-            background-color: white;
-            padding: 16px;
-            border-radius: 18px;
-            border-top-left-radius: 4px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.04);
-            font-size: 0.85rem;
-            line-height: 1.5;
-            color: var(--brand-dark);
-            flex-grow: 1;
-            position: relative;
+            background-color: white; padding: 16px; border-radius: 18px; border-top-left-radius: 4px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.04); font-size: 0.85rem; line-height: 1.5;
+            color: var(--brand-dark); flex-grow: 1; position: relative;
         }
-        .lina-name {
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: var(--brand-orange);
-            margin-bottom: 5px;
-            display: block;
-        }
-        
+        .lina-name { font-weight: 600; font-size: 0.8rem; color: var(--brand-orange); margin-bottom: 5px; display: block; }
+
         /* Filters */
-        .filters-container {
-            padding: 0 20px;
-            margin-bottom: 20px;
-        }
+        .filters-container { padding: 0 20px; margin-bottom: 20px; }
         .filter-card {
-            background-color: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
-            margin-bottom: 15px;
+            background-color: white; border-radius: 20px; padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); margin-bottom: 15px;
         }
-        .filter-group {
-            margin-bottom: 20px;
-        }
+        .filter-group { margin-bottom: 20px; }
         .filter-group:last-child { margin-bottom: 0; }
         .filter-group label {
-            font-weight: 600;
-            font-size: 0.8rem;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            color: var(--brand-dark);
+            font-weight: 600; font-size: 0.8rem; display: flex; justify-content: space-between;
+            margin-bottom: 12px; color: var(--brand-dark);
         }
-        .budget-value {
-            color: var(--brand-orange);
-            font-size: 0.95rem;
-        }
+        .budget-value { color: var(--brand-orange); font-size: 0.95rem; }
         
-        /* Custom Range Slider */
         input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            background: #E8F0EC;
-            border-radius: 5px;
-            outline: none;
+            -webkit-appearance: none; width: 100%; height: 6px; background: #E8F0EC;
+            border-radius: 5px; outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--brand-dark);
-            cursor: pointer;
-            border: 4px solid var(--brand-cream);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            margin-top: -9px;
+            -webkit-appearance: none; appearance: none; width: 24px; height: 24px;
+            border-radius: 50%; background: var(--brand-dark); cursor: pointer;
+            border: 4px solid var(--brand-cream); box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin-top: -9px;
         }
 
-        /* Dropdown */
         select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid #eee;
-            background-color: var(--brand-cream);
-            font-family: inherit;
-            font-size: 0.85rem;
-            color: var(--brand-dark);
-            font-weight: 500;
-            outline: none;
+            width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #eee;
+            background-color: var(--brand-cream); font-family: inherit; font-size: 0.85rem;
+            color: var(--brand-dark); font-weight: 500; outline: none;
         }
+        html[dir="rtl"] select { background-image: none; padding-left: 16px; }
 
-        /* Preference Pills */
-        .pills-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .pill-checkbox {
-            display: none;
-        }
+        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pill-checkbox { display: none; }
         .pill-label {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid #E0E0E0;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--brand-gray);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-color: white;
+            padding: 8px 16px; border-radius: 20px; border: 1px solid #E0E0E0;
+            font-size: 0.75rem; font-weight: 500; color: var(--brand-gray); cursor: pointer;
+            transition: all 0.2s ease; background-color: white;
         }
-        .pill-checkbox:checked + .pill-label {
-            background-color: var(--brand-dark);
-            color: white;
-            border-color: var(--brand-dark);
-        }
+        .pill-checkbox:checked + .pill-label { background-color: var(--brand-dark); color: white; border-color: var(--brand-dark); }
 
-        /* Results Grid */
-        .results-container {
-            padding: 0 20px;
-        }
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .results-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            color: var(--brand-dark);
-        }
+        /* Results */
+        .results-container { padding: 0 20px; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .results-header h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--brand-dark); }
+        html[dir="rtl"] .results-header h2 { font-family: 'Cairo', sans-serif; font-weight: 700; }
+        
         .item-card {
-            background-color: white;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-            transition: transform 0.2s;
+            background-color: white; border-radius: 20px; overflow: hidden;
+            margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.04);
         }
-        .item-card:active { transform: scale(0.98); }
-        .item-image {
-            width: 100%;
-            height: 160px;
-            background-color: #f0f0f0;
-            object-fit: cover;
-            display: block;
-        }
-        .item-content {
-            padding: 18px;
-        }
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-        .item-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--brand-dark);
-            line-height: 1.2;
-        }
-        .item-price {
-            font-weight: 700;
-            color: var(--brand-dark);
-            font-size: 1.1rem;
-            white-space: nowrap;
-            margin-left: 10px;
-        }
-        .item-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
+        .item-image { width: 100%; height: 160px; background-color: #f0f0f0; object-fit: cover; display: block; }
+        .item-content { padding: 18px; }
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .item-name { font-weight: 600; font-size: 1.1rem; color: var(--brand-dark); line-height: 1.3; }
+        .item-price { font-weight: 700; color: var(--brand-dark); font-size: 1.1rem; white-space: nowrap; }
+        .item-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
         .tag {
-            background-color: var(--brand-green-light);
-            color: var(--brand-dark);
-            font-size: 0.65rem;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            background-color: var(--brand-green-light); color: var(--brand-dark);
+            font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;
         }
         .item-desc {
-            font-size: 0.8rem;
-            color: var(--brand-gray);
-            line-height: 1.5;
-            margin-bottom: 15px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            font-size: 0.8rem; color: var(--brand-gray); line-height: 1.5; margin-bottom: 15px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
         .btn-view {
-            width: 100%;
-            padding: 12px;
-            background-color: white;
-            color: var(--brand-dark);
-            border: 1px solid var(--brand-dark);
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-family: inherit;
+            width: 100%; padding: 12px; background-color: white; color: var(--brand-dark);
+            border: 1px solid var(--brand-dark); border-radius: 12px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: background 0.2s; font-family: inherit;
         }
         .btn-view:hover { background-color: var(--brand-green-light); }
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--brand-gray);
-            background: white;
-            border-radius: 20px;
-        }
-        .no-results span { font-size: 2rem; display: block; margin-bottom: 10px; }
 
-        /* Modal (Bottom Sheet) */
+        /* Modal */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center;
+            align-items: flex-end; z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
         }
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
+        .modal-overlay.active { display: flex; opacity: 1; }
         .modal-content {
-            background: var(--brand-cream);
-            width: 100%;
-            max-width: 480px;
-            border-top-left-radius: 30px;
-            border-top-right-radius: 30px;
-            padding: 25px;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
+            background: var(--brand-cream); width: 100%; max-width: 480px;
+            border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px;
+            transform: translateY(100%); transition: transform 0.3s ease;
+            max-height: 90vh; overflow-y: auto;
         }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-        .modal-drag-handle {
-            width: 40px;
-            height: 5px;
-            background: #ddd;
-            border-radius: 5px;
-            margin: 0 auto 20px auto;
-        }
-        .modal-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-        .modal-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: var(--brand-dark);
-            margin-bottom: 8px;
-        }
-        .modal-price {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--brand-orange);
-            margin-bottom: 15px;
-        }
-        .modal-section-title {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--brand-dark);
-            margin: 20px 0 10px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .modal-desc {
-            font-size: 0.9rem;
-            color: var(--brand-gray);
-            line-height: 1.6;
-        }
-        .modal-ingredients {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .ingredient-tag {
-            background: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            color: var(--brand-dark);
-            border: 1px solid #eee;
-        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-drag-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
+        .modal-image { width: 100%; height: 200px; object-fit: cover; border-radius: 20px; margin-bottom: 20px; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--brand-dark); margin-bottom: 8px; }
+        html[dir="rtl"] .modal-title { font-family: 'Cairo', sans-serif; }
+        .modal-price { font-size: 1.2rem; font-weight: 700; color: var(--brand-orange); margin-bottom: 15px; }
+        .modal-section-title { font-weight: 600; font-size: 0.85rem; color: var(--brand-dark); margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-desc { font-size: 0.9rem; color: var(--brand-gray); line-height: 1.6; }
+        
         .btn-add {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--brand-dark);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: 25px;
-            font-family: inherit;
-            transition: background 0.2s;
+            width: 100%; padding: 16px; background-color: var(--brand-dark); color: white;
+            border: none; border-radius: 15px; font-weight: 600; font-size: 1rem;
+            cursor: pointer; margin-top: 25px; font-family: inherit; transition: background 0.2s;
         }
         .btn-add:active { background-color: #2a5548; }
         .btn-add.added { background-color: var(--brand-orange); }
-        .close-modal {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: none; /* Hidden for bottom sheet style, rely on overlay click */
+
+        /* Cart Modal Specific */
+        .cart-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid #eee;
         }
+        .cart-item-info { display: flex; flex-direction: column; gap: 5px; }
+        .cart-item-title { font-weight: 600; color: var(--brand-dark); font-size: 0.95rem; }
+        .cart-item-price { font-size: 0.85rem; color: var(--brand-gray); }
+        .cart-controls { display: flex; align-items: center; gap: 10px; }
+        .qty-btn {
+            width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--brand-dark);
+            background: white; color: var(--brand-dark); font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+        }
+        .cart-total {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 20px; font-size: 1.2rem; font-weight: 700; color: var(--brand-dark);
+            padding-top: 20px; border-top: 2px dashed #ddd;
+        }
+        .empty-cart { text-align: center; padding: 40px 0; color: var(--brand-gray); }
+        
+        .no-results { text-align: center; padding: 40px 20px; color: var(--brand-gray); background: white; border-radius: 20px; }
+        .no-results span { font-size: 2rem; display: block; margin-bottom: 10px; }
+
+        /* Full Menu Modal */
+        .full-menu-img { width: 100%; height: auto; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -428,21 +214,30 @@
 <div class="app-container">
     <!-- Header -->
     <header>
-        <h1>The Daily Grind</h1>
-        <p>Coffee & More</p>
+        <div style="width: 40px;"></div> <!-- Spacer -->
+        <div class="header-logo">
+            <h1>Vaya Cafe</h1>
+            <p>More than coffee</p>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn lang-btn" onclick="toggleLanguage()" id="lang-toggle">AR</button>
+            <button class="icon-btn" onclick="openCart()">
+                🛒<span class="cart-badge" id="cart-count">0</span>
+            </button>
+        </div>
     </header>
 
     <!-- Lina Assistant -->
     <div class="lina-section">
         <div class="lina-avatar-container">
             <div class="lina-avatar">
-                <!-- Replace this URL with your own image link if you have one -->
-                <img src="https://img.freepik.com/free-vector/hand-drawn-coffee-shop-logo-template_23-2149662232.jpg" alt="Lina">
+                <!-- IMPORTANT: Replace this URL with your uploaded character image link -->
+                <img src="https://i.ibb.co/6P9yQZ5/lina-avatar.jpg" alt="Lina" id="lina-img">
             </div>
             <div class="online-dot"></div>
         </div>
         <div class="lina-bubble">
-            <span class="lina-name">Lina</span>
+            <span class="lina-name" id="lina-name">Lina</span>
             <div id="lina-message">Hi! I'm Lina. Set your budget and preferences below, and I'll find the perfect order for you!</div>
         </div>
     </div>
@@ -450,34 +245,26 @@
     <!-- Filters -->
     <div class="filters-container">
         <div class="filter-card">
-            <!-- Budget -->
             <div class="filter-group">
-                <label>Max Budget <span class="budget-value" id="budget-display">150 EGP</span></label>
-                <input type="range" id="budget-slider" min="30" max="150" value="150" step="5">
+                <label><span id="lbl-budget">Max Budget</span> <span class="budget-value" id="budget-display">150 EGP</span></label>
+                <input type="range" id="budget-slider" min="20" max="150" value="150" step="5">
             </div>
 
-            <!-- Temperature / Type -->
             <div class="filter-group">
-                <label>What are you in the mood for?</label>
+                <label id="lbl-mood">What are you in the mood for?</label>
                 <select id="temp-select">
-                    <option value="all">Everything</option>
-                    <option value="cold">Something Cold / Iced 🧊</option>
-                    <option value="hot">Something Hot ☕</option>
-                    <option value="food">Food & Snacks 🥐</option>
+                    <option value="all" id="opt-all">Everything</option>
+                    <option value="cold" id="opt-cold">Something Cold / Iced 🧊</option>
+                    <option value="hot" id="opt-hot">Something Hot ☕</option>
+                    <option value="sweet" id="opt-sweet">Sweet & Desserts 🍰</option>
+                    <option value="fruity" id="opt-fruity">Fruity & Refreshing 🍹</option>
                 </select>
             </div>
 
-            <!-- Preferences -->
             <div class="filter-group">
-                <label>Dietary Preferences</label>
-                <div class="pills-container">
-                    <label><input type="checkbox" value="No Sugar" class="pill-checkbox pref-tag"><span class="pill-label">No Sugar</span></label>
-                    <label><input type="checkbox" value="Vegan" class="pill-checkbox pref-tag"><span class="pill-label">Vegan</span></label>
-                    <label><input type="checkbox" value="Sweet" class="pill-checkbox pref-tag"><span class="pill-label">Sweet</span></label>
-                    <label><input type="checkbox" value="Low Calorie" class="pill-checkbox pref-tag"><span class="pill-label">Low Calorie</span></label>
-                    <label><input type="checkbox" value="Snack" class="pill-checkbox pref-tag"><span class="pill-label">Snack</span></label>
-                    <label><input type="checkbox" value="Strong" class="pill-checkbox pref-tag"><span class="pill-label">Strong</span></label>
-                </div>
+                <button class="btn-view" onclick="openFullMenu()" id="btn-full-menu" style="border-color: var(--brand-orange); color: var(--brand-orange);">
+                    📖 View Full Menu Image
+                </button>
             </div>
         </div>
     </div>
@@ -491,56 +278,682 @@
     </div>
 </div>
 
-<!-- Modal (Bottom Sheet) -->
+<!-- Detail Modal -->
 <div class="modal-overlay" id="detail-modal">
-    <div class="modal-content" id="modal-content-body">
-        <!-- Content is generated by JavaScript -->
+    <div class="modal-content" id="modal-content-body"></div>
+</div>
+
+<!-- Cart Modal -->
+<div class="modal-overlay" id="cart-modal">
+    <div class="modal-content">
+        <div class="modal-drag-handle"></div>
+        <h2 class="modal-title" id="cart-title">My List</h2>
+        <div id="cart-items-container"></div>
+        <div class="cart-total" id="cart-total-container" style="display: none;">
+            <span id="lbl-total">Total:</span>
+            <span id="cart-total-price">0 EGP</span>
+        </div>
+        <button class="btn-add" onclick="closeModal('cart-modal')" id="btn-close-cart" style="margin-top: 15px;">Close</button>
+    </div>
+</div>
+
+<!-- Full Menu Modal -->
+<div class="modal-overlay" id="full-menu-modal">
+    <div class="modal-content">
+        <div class="modal-drag-handle"></div>
+        <h2 class="modal-title" style="margin-bottom: 15px;" id="full-menu-title">Full Menu</h2>
+        <!-- IMPORTANT: Replace this URL with your uploaded menu image link -->
+        <img src="https://i.ibb.co/6P9yQZ5/menu-placeholder.jpg" alt="Full Menu" class="full-menu-img" id="full-menu-img">
+        <button class="btn-add" onclick="closeModal('full-menu-modal')" style="margin-top: 20px;">Close</button>
     </div>
 </div>
 
 <script>
-    // --- 1. THE MENU DATA ---
-    // I added placeholder image URLs so the cards look beautiful immediately. 
-    // The cafe owner can replace these with their own image links.
-    const menuData = [
-        { id: "item_01", name: "Iced Americano", category: "Cold Coffee", price: 65, tags: ["No Sugar", "Iced", "Low Calorie", "Vegan"], description: "Bold espresso poured over cold water and ice for a crisp, smooth taste.", ingredients: ["Espresso Shot", "Water", "Ice"], sizes: [{ name: "Standard", price: 65 }], image: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_02", name: "Iced Matcha Latte", category: "Cold Drinks", price: 75, tags: ["No Sugar", "Iced", "Vegetarian"], description: "Rich Japanese green tea powder whisked with cold milk over ice.", ingredients: ["Matcha", "Fresh Milk", "Ice"], sizes: [{ name: "Small", price: 75 }, { name: "Large", price: 90 }], image: "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_03", name: "Caramel Frappé", category: "Blended Drinks", price: 110, tags: ["Iced", "Creamy", "Sweet"], description: "Blended coffee drink drizzled with sweet caramel and topped with whipped cream.", ingredients: ["Espresso", "Milk", "Caramel Syrup", "Ice", "Whipped Cream"], sizes: [{ name: "Standard", price: 110 }], image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_04", name: "Cold Brew", category: "Cold Coffee", price: 115, tags: ["Iced", "Low Calorie", "Strong", "No Sugar"], description: "Slow-steeped for 18 hours to unlock a naturally sweet, low-acid coffee taste.", ingredients: ["Filtered Water", "Steeped Arabica Beans", "Ice"], sizes: [{ name: "Standard", price: 115 }], image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_05", name: "Spanish Latte", category: "Hot Coffee", price: 85, tags: ["Sweet", "Hot", "Creamy"], description: "Rich espresso combined with textured steamed milk and sweetened condensed milk.", ingredients: ["Espresso", "Condensed Milk", "Steamed Milk"], sizes: [{ name: "Medium", price: 85 }, { name: "Large", price: 100 }], image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_06", name: "Iced Spanish Latte", category: "Cold Coffee", price: 95, tags: ["Sweet", "Iced", "Creamy"], description: "Espresso mixed with cold milk and sweet condensed milk served over ice.", ingredients: ["Espresso", "Condensed Milk", "Fresh Milk", "Ice"], sizes: [{ name: "Standard", price: 95 }], image: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_07", name: "Cappuccino", category: "Hot Coffee", price: 70, tags: ["Hot", "Classic", "Vegetarian"], description: "Equal parts espresso, steamed milk, and thick velvety milk foam.", ingredients: ["Espresso", "Steamed Milk", "Milk Foam"], sizes: [{ name: "Single", price: 70 }, { name: "Double", price: 85 }], image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_08", name: "Flat White", category: "Hot Coffee", price: 75, tags: ["Hot", "Strong", "Microfoam"], description: "Double espresso topped with thin microfoam for a smooth coffee-forward taste.", ingredients: ["Double Espresso Shot", "Steamed Whole Milk"], sizes: [{ name: "Standard", price: 75 }], image: "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_09", name: "Vanilla Bean Iced Latte", category: "Cold Coffee", price: 90, tags: ["Iced", "Sweet", "Flavored"], description: "Chilled espresso and cold milk sweetened with natural vanilla bean syrup.", ingredients: ["Espresso", "Vanilla Bean Syrup", "Milk", "Ice"], sizes: [{ name: "Standard", price: 90 }], image: "https://images.unsplash.com/photo-1592318951565-620d4c1a3727?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_10", name: "Pistachio Mocha", category: "Hot Coffee", price: 105, tags: ["Hot", "Nutty", "Sweet", "Specialty"], description: "Rich espresso blended with dark chocolate sauce and sweet pistachio cream.", ingredients: ["Espresso", "Pistachio Cream", "Dark Chocolate", "Milk"], sizes: [{ name: "Standard", price: 105 }], image: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_11", name: "Peach Iced Tea", category: "Non-Coffee Beverages", price: 60, tags: ["Iced", "Fruity", "Refreshing", "Low Calorie"], description: "Freshly brewed black tea infused with natural peach puree and ice.", ingredients: ["Brewed Black Tea", "Peach Puree", "Ice", "Mint Leaf"], sizes: [{ name: "Standard", price: 60 }], image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_12", name: "Berry Hibiscus Cooler", category: "Non-Coffee Beverages", price: 65, tags: ["Iced", "Fruity", "Caffeine-Free", "Vegan"], description: "Tangy dried hibiscus flowers steeped and blended with fresh forest berries.", ingredients: ["Hibiscus Tea", "Mixed Berry Mix", "Ice"], sizes: [{ name: "Standard", price: 65 }], image: "https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_13", name: "Fresh Passionfruit Lemonade", category: "Non-Coffee Beverages", price: 70, tags: ["Iced", "Sour-Sweet", "Refreshing", "Vegan"], description: "Freshly squeezed lemon juice combined with tropical passionfruit seeds.", ingredients: ["Lemon Juice", "Passionfruit Pulp", "Water", "Ice"], sizes: [{ name: "Standard", price: 70 }], image: "https://images.unsplash.com/photo-1523677011781-2d5d52943b26?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_14", name: "Butter Croissant", category: "Bakery & Snacks", price: 45, tags: ["Snack", "Pastry", "Vegetarian", "Freshly Baked"], description: "Flaky, golden-brown French butter croissant baked fresh daily.", ingredients: ["Butter", "Flour", "Yeast", "Milk"], sizes: [{ name: "Standard", price: 45 }], image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_15", name: "Chocolate Almond Croissant", category: "Bakery & Snacks", price: 60, tags: ["Snack", "Sweet", "Pastry", "Nuts"], description: "Butter croissant filled with chocolate cream and topped with toasted sliced almonds.", ingredients: ["Butter Croissant", "Dark Chocolate", "Almonds"], sizes: [{ name: "Standard", price: 60 }], image: "https://images.unsplash.com/photo-1601000938259-9e92002320b2?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_16", name: "Triple Fudge Brownie", category: "Desserts", price: 65, tags: ["Sweet", "Chocolate", "Dessert"], description: "Rich, dense chocolate brownie baked with dark chocolate chunks.", ingredients: ["Cocoa Powder", "Dark Chocolate", "Butter", "Flour", "Eggs"], sizes: [{ name: "Standard", price: 65 }], image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_17", name: "Blueberry Cheesecake Slice", category: "Desserts", price: 85, tags: ["Sweet", "Creamy", "Dessert"], description: "Classic New York style baked cheesecake topped with sweet blueberry compote.", ingredients: ["Cream Cheese", "Graham Crust", "Blueberries", "Sugar"], sizes: [{ name: "Slice", price: 85 }], image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_18", name: "Turkey & Cheddar Panini", category: "Savory Food", price: 120, tags: ["Hot Food", "Savory", "High Protein"], description: "Smoked turkey breast slices, aged cheddar cheese, and honey mustard pressed in sourdough bread.", ingredients: ["Sourdough Bread", "Smoked Turkey Breast", "Cheddar Cheese", "Honey Mustard"], sizes: [{ name: "Standard", price: 120 }], image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_19", name: "Caprese Sourdough Sandwich", category: "Savory Food", price: 110, tags: ["Savory", "Vegetarian", "Fresh"], description: "Fresh mozzarella slices, ripe tomatoes, basil pesto, and balsamic glaze on toasted sourdough.", ingredients: ["Sourdough Bread", "Fresh Mozzarella", "Tomato", "Basil Pesto", "Balsamic Glaze"], sizes: [{ name: "Standard", price: 110 }], image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" },
-        { id: "item_20", name: "Oatmeal Cranberry Cookie", category: "Bakery & Snacks", price: 40, tags: ["Snack", "Sweet", "Fiber"], description: "Chewy whole grain oat cookie packed with tart dried cranberries.", ingredients: ["Whole Rolled Oats", "Dried Cranberries", "Butter", "Brown Sugar"], sizes: [{ name: "Standard", price: 40 }], image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80" }
-    ];
+    // ==========================================
+    // 1. DATA PROCESSING (Paste your full JSON here)
+    // ==========================================
+    // Paste the exact JSON object you provided inside these curly brackets.
+    const rawVayaData = {
+        "cafe_name": "Vaya Cafe",
+        "menu": [
+            {
+  "cafe_name": "Vaya Cafe",
+  "menu": [
+    {
+      "category_en": "Classics Coffee",
+      "category_ar": "كلاسيك كوفي",
+      "items": [
+        {
+          "name_en": "Single Espresso",
+          "name_ar": "اسبريسو سنجل",
+          "price": 50,
+          "description_en": "Rich and bold single shot of pure espresso.",
+          "description_ar": "جرعة مركزة وغنية من الإسبريسو الصافي."
+        },
+        {
+          "name_en": "Double Espresso",
+          "name_ar": "اسبريسو دبل",
+          "price": 60,
+          "description_en": "Double shot of intense and aromatic espresso.",
+          "description_ar": "جرعة مضاعفة من الإسبريسو القوي والغني بالعطر."
+        },
+        {
+          "name_en": "Macchiato",
+          "name_ar": "ماكياتو",
+          "price": 75,
+          "description_en": "Espresso topped with a dollop of foamed milk.",
+          "description_ar": "إسبريسو مضاف إليه لمسة من رغوة الحليب."
+        },
+        {
+          "name_en": "Cortado",
+          "name_ar": "كورتادو",
+          "price": 70,
+          "description_en": "Equal parts of espresso and warm textured milk.",
+          "description_ar": "مقادير متساوية من الإسبريسو والحليب الدافئ."
+        },
+        {
+          "name_en": "Flat White",
+          "name_ar": "فلات وايت",
+          "price": 80,
+          "description_en": "Smooth espresso combined with velvety microfoam milk.",
+          "description_ar": "إسبريسو ناعم ممزوج برغوة الحليب المخملية الدقيقة."
+        },
+        {
+          "name_en": "Americano",
+          "name_ar": "أمريكانو",
+          "price": 65,
+          "description_en": "Espresso diluted with hot water for a smooth coffee experience.",
+          "description_ar": "إسبريسو مخفف بالماء الساخن لتجربة قهوة خفيفة وسلسة."
+        },
+        {
+          "name_en": "Single Turkish Coffee",
+          "name_ar": "قهوة تركي سنجل",
+          "price": 35,
+          "description_en": "Traditional finely ground Turkish coffee brewed in a cezve.",
+          "description_ar": "قهوة تركية مطحونة بدقة ومحضرة بالطريقة التقليدية."
+        },
+        {
+          "name_en": "Double Turkish Coffee",
+          "name_ar": "قهوة تركي دبل",
+          "price": 40,
+          "description_en": "Double portion of traditional rich Turkish coffee.",
+          "description_ar": "حصة مضاعفة من القهوة التركية الغنية التقليدية."
+        },
+        {
+          "name_en": "Farsawy Coffee",
+          "name_ar": "قهوة فرساوي",
+          "price": 50,
+          "description_en": "Authentic local specialty-style traditional coffee.",
+          "description_ar": "قهوة تقليدية أصيلة على الطريقة الفرساوي المميزة."
+        },
+        {
+          "name_en": "Hazelnut Coffee",
+          "name_ar": "قهوة بندق",
+          "price": 55,
+          "description_en": "Classic coffee infused with delicious roasted hazelnut flavor.",
+          "description_ar": "قهوة كلاسيكية نكهة البندق المحمص اللذيذ."
+        },
+        {
+          "name_en": "Cappuccino",
+          "name_ar": "كابتشينو",
+          "price": 75,
+          "description_en": "Equal parts of espresso, steamed milk, and thick milk foam.",
+          "description_ar": "أجزاء متساوية من الإسبريسو، الحليب المبخر، ورغوة الحليب الكثيفة."
+        },
+        {
+          "name_en": "Latte",
+          "name_ar": "لاتيه",
+          "price": 80,
+          "description_en": "Espresso with a generous amount of steamed milk and light foam.",
+          "description_ar": "إسبريسو مع كمية وفيرة من الحليب المبخر ورغوة خفيفة."
+        },
+        {
+          "name_en": "Spanish Latte",
+          "name_ar": "سبانيش لاتيه",
+          "price": 90,
+          "description_en": "Sweet and creamy espresso latte with condensed milk.",
+          "description_ar": "لاتيه إسبريسو حلو وكريمي بالحليب المحلى المكثف."
+        },
+        {
+          "name_en": "Caramel Latte",
+          "name_ar": "كراميل لاتيه",
+          "price": 90,
+          "description_en": "Smooth latte sweetened with rich caramel syrup.",
+          "description_ar": "لاتيه ناعم محلى بشراب الكراميل الغني."
+        },
+        {
+          "name_en": "Nutella Latte",
+          "name_ar": "نوتيلا لاتيه",
+          "price": 90,
+          "description_en": "Luxurious latte blended with rich Nutella chocolate spread.",
+          "description_ar": "لاتيه فاخر ممزوج بشوكولاتة النوتيلا الغنية."
+        },
+        {
+          "name_en": "Mocha Latte",
+          "name_ar": "موكا لاتيه",
+          "price": 90,
+          "description_en": "A delicious blend of espresso, chocolate, and steamed milk.",
+          "description_ar": "مزيج لذيذ من الإسبريسو، الشوكولاتة، والحليب المبخر."
+        },
+        {
+          "name_en": "Salted Caramel",
+          "name_ar": "كراميل مملح",
+          "price": 90,
+          "description_en": "Sweet caramel latte accented with a touch of sea salt.",
+          "description_ar": "لاتيه كراميل حلو مع لمسة خفيفة من الملح البحري."
+        },
+        {
+          "name_en": "Lotus Latte",
+          "name_ar": "لوتس لاتيه",
+          "price": 75,
+          "description_en": "Latte infused with spiced Lotus Biscoff flavor and spread.",
+          "description_ar": "لاتيه بنكهة وعجينة بسكويت اللوتس المقرمش."
+        },
+        {
+          "name_en": "Nescafé",
+          "name_ar": "نسكافيه",
+          "price": 50,
+          "description_en": "Classic instant coffee prepared with hot milk or water.",
+          "description_ar": "قهوة سريعة الذوبان تقليدية محضرة بالحليب أو الماء الساخن."
+        }
+      ]
+    },
+    {
+      "category_en": "Signature Drinks",
+      "category_ar": "مشروبات مميزة",
+      "items": [
+        {
+          "name_en": "Ice Coffee",
+          "name_ar": "ايس كوفي",
+          "price": 95,
+          "description_en": "Chilled refreshing coffee served over ice cubes.",
+          "description_ar": "قهوة باردة ومنعشة تقدم فوق مكعبات الثلج."
+        },
+        {
+          "name_en": "Ice Mocha",
+          "name_ar": "ايس موكا",
+          "price": 95,
+          "description_en": "Cold blend of espresso, chocolate, milk, and ice.",
+          "description_ar": "مزيج بارد من الإسبريسو، الشوكولاتة، الحليب، والثلج."
+        },
+        {
+          "name_en": "Caramel Macchiato",
+          "name_ar": "كراميل ميكاتو",
+          "price": 95,
+          "description_en": "Layered iced coffee with vanilla, milk, espresso, and caramel drizzle.",
+          "description_ar": "قهوة مثلجة طبقات بالفانيليا، الحليب، الإسبريسو، وصوص الكراميل."
+        },
+        {
+          "name_en": "Ice Latte",
+          "name_ar": "ايس لاتيه",
+          "price": 75,
+          "description_en": "Refreshing cold milk and espresso over ice.",
+          "description_ar": "حليب بارد منعش مع الإسبريسو فوق الثلج."
+        },
+        {
+          "name_en": "Ice White Mocha",
+          "name_ar": "ايس وايت موكا",
+          "price": 85,
+          "description_en": "Chilled creamy blend of white chocolate, espresso, and milk.",
+          "description_ar": "مزيج كريمي بارد من الشوكولاتة البيضاء، الإسبريسو، والحليب."
+        },
+        {
+          "name_en": "Ice Salted Caramel",
+          "name_ar": "ايس سولد ت كاراميل",
+          "price": 90,
+          "description_en": "Cold sweet caramel coffee with a hint of salt over ice.",
+          "description_ar": "قهوة باردة بكراميل حلو مع لمسة ملح فوق الثلج."
+        },
+        {
+          "name_en": "Ice Spanish Latte",
+          "name_ar": "ايس اسبانش لاتيه",
+          "price": 80,
+          "description_en": "Sweet iced latte made with rich condensed milk and espresso.",
+          "description_ar": "لاتيه مثلج وحلو مصنوع من الحليب المحلى المكثف والإسبريسو."
+        },
+        {
+          "name_en": "Ice Pistachio Latte",
+          "name_ar": "ايس بيستاشيو لاتيه",
+          "price": 90,
+          "description_en": "Cold creamy espresso latte infused with rich pistachio flavor.",
+          "description_ar": "لاتيه إسبريسو كريمي بارد نكهة الفستق الغني."
+        },
+        {
+          "name_en": "Ice Americano",
+          "name_ar": "ايس امريكانو",
+          "price": 60,
+          "description_en": "Espresso poured over cold water and ice for a crisp taste.",
+          "description_ar": "إسبريسو مسكوب فوق الماء البارد والثلج لمذاق منعش وخفيف."
+        },
+        {
+          "name_en": "Affogato Coffee",
+          "name_ar": "افجاتو كوفي",
+          "price": 60,
+          "description_en": "A scoop of vanilla ice cream drowned with a hot shot of espresso.",
+          "description_ar": "كرة من آيس كريم الفانيليا مغطاة بجرعة ساخنة من الإسبريسو."
+        }
+      ]
+    },
+    {
+      "category_en": "Hot Drinks",
+      "category_ar": "مشروبات ساخنة",
+      "items": [
+        {
+          "name_en": "Tea",
+          "name_ar": "شاي",
+          "price": 20,
+          "description_en": "Classic hot brewed black tea.",
+          "description_ar": "شاي أسود ساخن ومخمر بالطريقة التقليدية."
+        },
+        {
+          "name_en": "Green Tea",
+          "name_ar": "شاي أخضر",
+          "price": 30,
+          "description_en": "Soothing and healthy hot green tea infusion.",
+          "description_ar": "شاي أخضر ساخن ومريح وصحي."
+        },
+        {
+          "name_en": "Tea with Milk",
+          "name_ar": "شاي بالحليب",
+          "price": 35,
+          "description_en": "Hot black tea blended with warm creamy milk.",
+          "description_ar": "شاي أسود ساخن ممزوج بالحليب الدافئ الكريمي."
+        },
+        {
+          "name_en": "Herbs",
+          "name_ar": "الأعشاب Herbs",
+          "price": 30,
+          "description_en": "A calming selection of natural hot herbal infusion.",
+          "description_ar": "تشكيلة مهدئة من الأعشاب الطبيعية الساخنة."
+        },
+        {
+          "name_en": "Hot Cider",
+          "name_ar": "هوت سايدر",
+          "price": 40,
+          "description_en": "Warm spiced apple cider drink.",
+          "description_ar": "مشروب عصير التفاح الساخن والمتبل."
+        },
+        {
+          "name_en": "Cinnamon Milk",
+          "name_ar": "قرفة حليب",
+          "price": 50,
+          "description_en": "Warm comforting milk infused with aromatic cinnamon.",
+          "description_ar": "حليب دافئ ومريح منكه بالقرفة العطرية."
+        },
+        {
+          "name_en": "Fruit Tea",
+          "name_ar": "شاي فواكه",
+          "price": 30,
+          "description_en": "Hot flavorful tea infused with mixed fruit extracts.",
+          "description_ar": "شاي ساخن ونكهة غنية بخلاصات الفواكه المشكلة."
+        },
+        {
+          "name_en": "Sahlab",
+          "name_ar": "سحلب",
+          "price": 60,
+          "description_en": "Traditional thick warm milky Egyptian winter drink.",
+          "description_ar": "مشروب شتوي مصري تقليدي حار وكثيف بالحليب."
+        },
+        {
+          "name_en": "Sahlab with Nuts",
+          "name_ar": "سحلب مكسرات",
+          "price": 70,
+          "description_en": "Traditional hot sahlab topped with crunchy mixed nuts.",
+          "description_ar": "سحلب ساخن تقليدي مغطى بالمكسرات المشكلة المقرمشة."
+        },
+        {
+          "name_en": "Hot Chocolate",
+          "name_ar": "هوت شوكلت",
+          "price": 55,
+          "description_en": "Rich and creamy hot chocolate drink.",
+          "description_ar": "مشروب شوكولاتة ساخن غني وكريمي."
+        },
+        {
+          "name_en": "Hot Marshmallow",
+          "name_ar": "هوت مارشميلو",
+          "price": 65,
+          "description_en": "Hot chocolate topped with melted sweet marshmallows.",
+          "description_ar": "شوكولاتة ساخنة مغطاة بقطع المارشميلو الحلوة الذائبة."
+        },
+        {
+          "name_en": "Hot Espresso",
+          "name_ar": "هوت اسبريسو",
+          "price": 70,
+          "description_en": "Warm and intense hot espresso preparation.",
+          "description_ar": "تحضير إسبريسو ساخن وقوي."
+        },
+        {
+          "name_en": "Hot Chocolate with Nuts",
+          "name_ar": "هوت شوكلت مكسرات",
+          "price": 80,
+          "description_en": "Rich hot chocolate garnished with crunchy mixed nuts.",
+          "description_ar": "شوكولاتة ساخنة غنية مزينة بالمكسرات المقرمشة."
+        }
+      ]
+    },
+    {
+      "category_en": "Milkshake",
+      "category_ar": "ميلك شيك",
+      "items": [
+        {
+          "name_en": "Milkshake (Caramel, Mango, Strawberry, Mocha, Oreo)",
+          "name_ar": "ميلك شيك (كراميل - مانجو - فراولة - موكا - أوريو)",
+          "price": 95,
+          "description_en": "Thick and creamy milkshake blended with your choice of flavor.",
+          "description_ar": "ميلك شيك سميك وكريمي ممزوج بالنكهة التي تختيرها."
+        },
+        {
+          "name_en": "Milkshake (Kinder, Nescafé)",
+          "name_ar": "ميلك شيك (كيندر - نسكافيه)",
+          "price": 100,
+          "description_en": "Rich milkshake flavored with Kinder chocolate or Nescafé.",
+          "description_ar": "ميلك شيك غني بنكهة شوكولاتة كيندر أو النسكافيه."
+        },
+        {
+          "name_en": "Milkshake (Vanilla, Blueberry, Caramel Nuts, Popcorn, Snickers, Pistachio)",
+          "name_ar": "ميلك شيك (فانيليا - بلوبيري - كراميل مكسرات - فشار - سنيكرز - فستق)",
+          "price": 110,
+          "description_en": "Deluxe thick milkshake blended with premium specialty flavors.",
+          "description_ar": "ميلك شيك فاخر وسميك ممزوج بنكهات مميزة وخاصة."
+        }
+      ]
+    },
+    {
+      "category_en": "Cocktail",
+      "category_ar": "كوكتيل",
+      "items": [
+        {
+          "name_en": "Vaya Cocktail",
+          "name_ar": "فايا",
+          "price": 90,
+          "description_en": "Vaya signature special fruit cocktail blend.",
+          "description_ar": "مزيج كوكتيل الفواكه الخاص والمميز من فايا."
+        },
+        {
+          "name_en": "Velvet Green",
+          "name_ar": "فيلفيد جرين",
+          "price": 90,
+          "description_en": "Smooth and refreshing green fruit cocktail.",
+          "description_ar": "كوكتيل فواكه أخضر ناعم ومنعش."
+        },
+        {
+          "name_en": "Pink Monkey",
+          "name_ar": "بنك مانكي",
+          "price": 90,
+          "description_en": "Sweet and fruity pink specialty cocktail blend.",
+          "description_ar": "مزيج كوكتيل وردي حلو وفواكهي خاص."
+        },
+        {
+          "name_en": "Pina Colada",
+          "name_ar": "بينا كولادا",
+          "price": 90,
+          "description_en": "Tropical blend of creamy coconut and sweet pineapple.",
+          "description_ar": "مزيج استوائي من جوز الهند الكريمي والأناناس الحلو."
+        },
+        {
+          "name_en": "Mango & Passion Fruit",
+          "name_ar": "مانجو وباشن فروت",
+          "price": 90,
+          "description_en": "Exotic fusion of sweet mango and tangy passion fruit.",
+          "description_ar": "مزيج استوائي غريب من المانجو الحلوة والباشن فروت المنعشة."
+        },
+        {
+          "name_en": "Mango & Peach",
+          "name_ar": "مانجو وخوخ",
+          "price": 90,
+          "description_en": "Delicious smoothie mix of ripe mango and juicy peach.",
+          "description_ar": "مزيج لذيذ من المانجو الناضجة والخوخ العصيري."
+        },
+        {
+          "name_en": "Mango & Pineapple",
+          "name_ar": "مانجو وأناناس",
+          "price": 90,
+          "description_en": "Refreshing tropical combination of mango and pineapple juice.",
+          "description_ar": "مزيج استوائي منعش من عصير المانجو والأناناس."
+        },
+        {
+          "name_en": "Triple Vibe (New)",
+          "name_ar": "تريبل فايب (جديد)",
+          "price": 100,
+          "description_en": "Mango x strawberry x banana milk tropical blend.",
+          "description_ar": "مزيج استوائي من مانجو × فراولة × حليب موز."
+        }
+      ]
+    },
+    {
+      "category_en": "Coffee Blended",
+      "category_ar": "كوفي بلندد",
+      "items": [
+        {
+          "name_en": "Spanish Frappuccino",
+          "name_ar": "فرابتشينو اسبانش",
+          "price": 85,
+          "description_en": "Blended iced coffee with Spanish latte condensed milk flavor.",
+          "description_ar": "قهوة مثلجة مخفوقة بنكهة الحليب المكثف للسبانيش لاتيه."
+        },
+        {
+          "name_en": "Caramel Frappuccino",
+          "name_ar": "فرابتشينو كراميل",
+          "price": 85,
+          "description_en": "Blended iced coffee with rich caramel syrup and whipped cream.",
+          "description_ar": "قهوة مثلجة مخفوقة بشراب الكراميل الغني والكريمة المخفوقة."
+        },
+        {
+          "name_en": "Mocha Frappuccino",
+          "name_ar": "فرابتشينو موكا",
+          "price": 85,
+          "description_en": "Blended iced coffee with chocolate and milk.",
+          "description_ar": "قهوة مثلجة مخفوقة بالشوكولاتة والحليب."
+        },
+        {
+          "name_en": "White Mocha Frappuccino",
+          "name_ar": "فرابتشينو وايت موكا",
+          "price": 85,
+          "description_en": "Blended iced coffee with sweet white chocolate.",
+          "description_ar": "قهوة مثلجة مخفوقة بالشوكولاتة البيضاء الحلوة."
+        },
+        {
+          "name_en": "Salted Caramel Frappuccino",
+          "name_ar": "فرابتشينو سولتت كراميل",
+          "price": 85,
+          "description_en": "Blended iced coffee with salted caramel flavor.",
+          "description_ar": "قهوة مثلجة مخفوقة بنكهة الكراميل المملح."
+        }
+      ]
+    },
+    {
+      "category_en": "Non-Coffee Blended",
+      "category_ar": "نون كوفي بلندد",
+      "items": [
+        {
+          "name_en": "Caramel Frappé",
+          "name_ar": "فرابيه كراميل",
+          "price": 75,
+          "description_en": "Creamy ice-blended beverage with sweet caramel flavor.",
+          "description_ar": "مشروب مثلج ومخفوق كريمي بنكهة الكراميل الحلو."
+        },
+        {
+          "name_en": "Strawberry Frappé",
+          "name_ar": "فرابيه الفراولة",
+          "price": 85,
+          "description_en": "Blended ice drink with sweet strawberry flavor.",
+          "description_ar": "مشروب ثلجي مخفوق بنكهة الفراولة الحلوة."
+        },
+        {
+          "name_en": "Mixed Berry Frappé",
+          "name_ar": "فرابيه مكس بيري",
+          "price": 85,
+          "description_en": "Blended ice drink with assorted forest berry flavors.",
+          "description_ar": "مشروب ثلجي مخفوق بنكهات التوت المشكل."
+        },
+        {
+          "name_en": "Vanilla Frappé",
+          "name_ar": "فرابيه الفانيليا",
+          "price": 75,
+          "description_en": "Smooth and creamy blended vanilla ice drink.",
+          "description_ar": "مشروب ثلجي مخفوق بالفانيليا ناعم وكريمي."
+        },
+        {
+          "name_en": "Coconut Frappé",
+          "name_ar": "فرابيه جوز الهند",
+          "price": 75,
+          "description_en": "Tropical blended ice drink with coconut flavor.",
+          "description_ar": "مشروب ثلجي مخفوق استوائي بنكهة جوز الهند."
+        },
+        {
+          "name_en": "Mocha Frappé",
+          "name_ar": "فرابيه موكا",
+          "price": 75,
+          "description_en": "Blended ice drink with chocolate and milk without coffee.",
+          "description_ar": "مشروب ثلجي مخفوق بالشوكولاتة والحليب بدون قهوة."
+        },
+        {
+          "name_en": "Berry Frappé",
+          "name_ar": "فرابيه بيري",
+          "price": 85,
+          "description_en": "Refreshing blended ice drink with berry flavor.",
+          "description_ar": "مشروب ثلجي مخفوق ومنعش بنكهة التوت."
+        }
+      ]
+    },
+    {
+      "category_en": "Matcha",
+      "category_ar": "ماتشا",
+      "items": [
+        {
+          "name_en": "Iced Matcha Latte",
+          "name_ar": "ايس ماتشا لاتيه",
+          "price": 110,
+          "description_en": "Japanese green tea matcha powder shaken with milk and ice.",
+          "description_ar": "بودرة الشاي الأخضر الياباني ماتشا مخفوقة مع الحليب والثلج."
+        },
+        {
+          "name_en": "Iced Spanish Matcha",
+          "name_ar": "ايس اسبانش ماتشا",
+          "price": 125,
+          "description_en": "Iced matcha latte sweetened with rich condensed milk.",
+          "description_ar": "ماتشا لاتيه مثلج محلى بالحليب المكثف الغني."
+        },
+        {
+          "name_en": "Iced Blueberry Matcha",
+          "name_ar": "ايس ماتشا بلوبيري",
+          "price": 140,
+          "description_en": "Iced matcha latte layered wi
+        ]
+    };
 
-    // --- 2. DOM ELEMENTS ---
+    // Flatten the nested JSON into a single array for easy filtering
+    let flatMenu = [];
+    if (rawVayaData && rawVayaData.menu) {
+        rawVayaData.menu.forEach(cat => {
+            cat.items.forEach(item => {
+                // Auto-generate tags based on name/description to make filters work
+                let tags = [];
+                let searchString = (item.name_en + " " + item.description_en).toLowerCase();
+                
+                if (searchString.includes('iced') || searchString.includes('cold') || searchString.includes('frappe') || searchString.includes('mojito') || searchString.includes('smoothie')) tags.push('Cold');
+                if (searchString.includes('hot') || cat.category_en.includes('Hot')) tags.push('Hot');
+                if (searchString.includes('sweet') || searchString.includes('caramel') || searchString.includes('nutella') || searchString.includes('chocolate') || searchString.includes('lotus') || cat.category_en.includes('Dessert') || cat.category_en.includes('Waffle') || cat.category_en.includes('Ice Cream')) tags.push('Sweet');
+                if (searchString.includes('juice') || searchString.includes('fruit') || searchString.includes('berry') || searchString.includes('mango') || cat.category_en.includes('Refresher')) tags.push('Fruity');
+                if (searchString.includes('vegan') || searchString.includes('black')) tags.push('Vegan');
+                if (searchString.includes('milk') || searchString.includes('latte') || searchString.includes('creamy')) tags.push('Creamy');
+
+                flatMenu.push({
+                    id: "item_" + Math.random().toString(36).substr(2, 9),
+                    name_en: item.name_en,
+                    name_ar: item.name_ar,
+                    price: item.price,
+                    desc_en: item.description_en,
+                    desc_ar: item.description_ar,
+                    category_en: cat.category_en,
+                    category_ar: cat.category_ar,
+                    tags: tags,
+                    // Placeholder images based on category
+                    image: getCategoryImage(cat.category_en)
+                });
+            });
+        });
+    }
+
+    function getCategoryImage(category) {
+        const cat = category.toLowerCase();
+        if (cat.includes('espresso') || cat.includes('hot')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=600&q=80';
+        if (cat.includes('cold') || cat.includes('iced')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80';
+        if (cat.includes('bakery') || cat.includes('croissant')) return 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80';
+        if (cat.includes('dessert') || cat.includes('cake')) return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
+        if (cat.includes('juice') || cat.includes('smoothie') || cat.includes('mojito')) return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80';
+        return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80'; // Default cafe
+    }
+
+    // ==========================================
+    // 2. STATE MANAGEMENT (Cart & Language)
+    // ==========================================
+    let currentLang = 'en';
+    let cart = []; // Array to hold { item, quantity }
+
+    const translations = {
+        en: {
+            budget: "Max Budget", mood: "What are you in the mood for?", all: "Everything", cold: "Something Cold / Iced 🧊", hot: "Something Hot ☕", sweet: "Sweet & Desserts 🍰", fruity: "Fruity & Refreshing 🍹",
+            viewMenu: "📖 View Full Menu Image", recommended: "Recommended for you", viewDetails: "View Details", addList: "❤️ Add to My List", added: "✓ Added to List!",
+            myList: "My List", total: "Total:", emptyCart: "Your list is empty. Add some items!", close: "Close", fullMenu: "Full Menu", noResults: "No items match your filters."
+        },
+        ar: {
+            budget: "أقصى ميزانية", mood: "ما هو مزاجك الآن؟", all: "كل شيء", cold: "مشروب بارد 🧊", hot: "مشروب ساخن ☕", sweet: "حلويات 🍰", fruity: "فواكه ومنعش 🍹",
+            viewMenu: "📖 عرض صورة المنيو كاملة", recommended: "مقترح لك", viewDetails: "عرض التفاصيل", addList: "❤️ أضف إلى قائمتي", added: "✓ تمت الإضافة!",
+            myList: "قائمتي", total: "الإجمالي:", emptyCart: "قائمتك فارغة. أضف بعض العناصر!", close: "إغلاق", fullMenu: "المنيو كاملة", noResults: "لا توجد عناصر تطابق بحثك."
+        }
+    };
+
+    // ==========================================
+    // 3. DOM ELEMENTS
+    // ==========================================
     const budgetSlider = document.getElementById('budget-slider');
     const budgetDisplay = document.getElementById('budget-display');
     const tempSelect = document.getElementById('temp-select');
-    const prefTags = document.querySelectorAll('.pref-tag');
     const menuContainer = document.getElementById('menu-items');
     const linaMessage = document.getElementById('lina-message');
     const modal = document.getElementById('detail-modal');
     const modalContent = document.getElementById('modal-content-body');
+    const cartModal = document.getElementById('cart-modal');
 
-    // --- 3. RENDER FUNCTION ---
+    // ==========================================
+    // 4. LANGUAGE LOGIC
+    // ==========================================
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'ar' : 'en';
+        document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = currentLang;
+        document.getElementById('lang-toggle').innerText = currentLang === 'en' ? 'AR' : 'EN';
+        
+        // Update static UI text
+        const t = translations[currentLang];
+        document.getElementById('lbl-budget').innerText = t.budget;
+        document.getElementById('lbl-mood').innerText = t.mood;
+        document.getElementById('opt-all').innerText = t.all;
+        document.getElementById('opt-cold').innerText = t.cold;
+        document.getElementById('opt-hot').innerText = t.hot;
+        document.getElementById('opt-sweet').innerText = t.sweet;
+        document.getElementById('opt-fruity').innerText = t.fruity;
+        document.getElementById('btn-full-menu').innerText = t.viewMenu;
+        document.getElementById('results-title').innerText = t.recommended;
+        document.getElementById('cart-title').innerText = t.myList;
+        document.getElementById('lbl-total').innerText = t.total;
+        document.getElementById('btn-close-cart').innerText = t.close;
+        document.getElementById('full-menu-title').innerText = t.fullMenu;
+
+        filterMenu(); // Re-render menu
+        renderCart(); // Re-render cart
+    }
+
+    // ==========================================
+    // 5. RENDER FUNCTIONS
+    // ==========================================
     function renderMenu(items) {
         menuContainer.innerHTML = '';
+        const t = translations[currentLang];
         
         if (items.length === 0) {
-            menuContainer.innerHTML = `<div class="no-results"><span>😔</span>No items match your current filters.<br>Try adjusting them!</div>`;
+            menuContainer.innerHTML = `<div class="no-results"><span>😔</span>${t.noResults}</div>`;
             return;
         }
 
@@ -549,137 +962,207 @@
             card.className = 'item-card';
             
             let tagsHtml = '';
-            item.tags.slice(0, 3).forEach(tag => { // Show max 3 tags on card
+            item.tags.slice(0, 3).forEach(tag => {
                 tagsHtml += `<span class="tag">${tag}</span>`;
             });
 
+            const name = currentLang === 'en' ? item.name_en : item.name_ar;
+            const desc = currentLang === 'en' ? item.desc_en : item.desc_ar;
+
             card.innerHTML = `
-                <img src="${item.image}" alt="${item.name}" class="item-image" loading="lazy">
+                <img src="${item.image}" alt="${name}" class="item-image" loading="lazy">
                 <div class="item-content">
                     <div class="item-header">
-                        <div class="item-name">${item.name}</div>
+                        <div class="item-name">${name}</div>
                         <div class="item-price">${item.price} EGP</div>
                     </div>
                     <div class="item-tags">${tagsHtml}</div>
-                    <p class="item-desc">${item.description}</p>
-                    <button class="btn-view" onclick="openDetails('${item.id}')">View Details</button>
+                    <p class="item-desc">${desc}</p>
+                    <button class="btn-view" onclick="openDetails('${item.id}')">${t.viewDetails}</button>
                 </div>
             `;
             menuContainer.appendChild(card);
         });
     }
 
-    // --- 4. FILTER LOGIC ---
-    function filterMenu() {
-        const maxBudget = parseInt(budgetSlider.value);
-        const tempFilter = tempSelect.value;
-        
-        const selectedPrefs = Array.from(prefTags)
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
-
-        const filteredItems = menuData.filter(item => {
-            // 1. Budget Check
-            if (item.price > maxBudget) return false;
-
-            // 2. Temperature / Type Check
-            if (tempFilter === 'cold' && !item.tags.includes('Iced')) return false;
-            if (tempFilter === 'hot' && !item.tags.includes('Hot')) return false;
-            if (tempFilter === 'food' && !item.tags.includes('Snack') && !item.tags.includes('Savory') && !item.tags.includes('Dessert')) return false;
-
-            // 3. Preference Tags Check
-            if (selectedPrefs.length > 0) {
-                const hasAllPrefs = selectedPrefs.every(pref => item.tags.includes(pref));
-                if (!hasAllPrefs) return false;
-            }
-
-            return true;
-        });
-
-        renderMenu(filteredItems);
-        updateLinaMessage(filteredItems, maxBudget, selectedPrefs, tempFilter);
-    }
-
-    // --- 5. LINA'S AUTOMATED PERSONALITY ---
-    function updateLinaMessage(items, budget, prefs, temp) {
+    function updateLinaMessage(items, budget) {
         let message = "";
+        const t = translations[currentLang];
         
         if (items.length === 0) {
-            message = `Oh no! I couldn't find anything matching those exact preferences under ${budget} EGP. 😔 Try increasing your budget or removing a preference!`;
-        } else if (items.length === 1) {
-            message = `I found exactly one perfect match for you under ${budget} EGP! Check out the ${items[0].name}.`;
-        } else if (prefs.length > 0) {
-            message = `Great choice! I found ${items.length} options under ${budget} EGP that are ${prefs.join(' & ')}. Here are my top picks!`;
-        } else if (temp !== 'all') {
-            message = `Here are ${items.length} options for you under ${budget} EGP. Let me know if you want to narrow it down!`;
+            message = currentLang === 'en' 
+                ? `Oh no! I couldn't find anything matching those preferences under ${budget} EGP. 😔 Try adjusting your filters!`
+                : `للأسف! لم أجد أي شيء يطابق هذه التفضيلات تحت ${budget} جنيه. 😔 جرب تغيير الفلاتر!`;
         } else {
-            message = `Here are ${items.length} refreshing options for you under ${budget} EGP. Let me know if you want to narrow it down!`;
+            message = currentLang === 'en'
+                ? `Great! I found ${items.length} options for you under ${budget} EGP. Here are my top picks!`
+                : `رائع! وجدت ${items.length} خيارات لك تحت ${budget} جنيه. إليك أفضل الاقتراحات!`;
         }
 
         linaMessage.innerHTML = message;
     }
 
-    // --- 6. MODAL LOGIC (View Details) ---
+    // ==========================================
+    // 6. FILTER LOGIC
+    // ==========================================
+    function filterMenu() {
+        const maxBudget = parseInt(budgetSlider.value);
+        const moodFilter = tempSelect.value;
+        budgetDisplay.textContent = `${maxBudget} EGP`;
+
+        const filteredItems = flatMenu.filter(item => {
+            // Budget Check
+            if (item.price > maxBudget) return false;
+
+            // Mood Check (Tags)
+            if (moodFilter !== 'all') {
+                const hasTag = item.tags.some(tag => tag.toLowerCase() === moodFilter);
+                if (!hasTag) return false;
+            }
+            return true;
+        });
+
+        renderMenu(filteredItems);
+        updateLinaMessage(filteredItems, maxBudget);
+    }
+
+    // ==========================================
+    // 7. MODAL & CART LOGIC
+    // ==========================================
     window.openDetails = function(id) {
-        const item = menuData.find(i => i.id === id);
+        const item = flatMenu.find(i => i.id === id);
         if (!item) return;
 
-        let sizesHtml = item.sizes.map(s => `<span class="ingredient-tag">${s.name} (${s.price} EGP)</span>`).join('');
-        let ingredientsHtml = item.ingredients.map(i => `<span class="ingredient-tag">${i}</span>`).join('');
-        let tagsHtml = item.tags.map(t => `<span class="tag">${t}</span>`).join('');
+        const t = translations[currentLang];
+        const name = currentLang === 'en' ? item.name_en : item.name_ar;
+        const desc = currentLang === 'en' ? item.desc_en : item.desc_ar;
+        const cat = currentLang === 'en' ? item.category_en : item.category_ar;
+        let tagsHtml = item.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
 
         modalContent.innerHTML = `
             <div class="modal-drag-handle"></div>
-            <img src="${item.image}" alt="${item.name}" class="modal-image">
-            <h2 class="modal-title">${item.name}</h2>
+            <img src="${item.image}" alt="${name}" class="modal-image">
+            <h2 class="modal-title">${name}</h2>
             <div class="modal-price">${item.price} EGP</div>
             <div class="item-tags" style="margin-bottom:15px;">${tagsHtml}</div>
             
-            <p class="modal-desc">${item.description}</p>
+            <p class="modal-desc">${desc}</p>
             
-            <div class="modal-section-title">Available Sizes</div>
-            <div class="modal-ingredients">${sizesHtml}</div>
+            <div class="modal-section-title">${cat}</div>
             
-            <div class="modal-section-title">Ingredients</div>
-            <div class="modal-ingredients">${ingredientsHtml}</div>
-            
-            <button class="btn-add" onclick="addToList(this)">❤️ Add to My List</button>
+            <button class="btn-add" id="btn-add-cart" onclick="addToCart('${item.id}')">${t.addList}</button>
         `;
 
         modal.classList.add('active');
     }
 
-    window.addToList = function(btn) {
-        btn.innerHTML = "✓ Added to List!";
-        btn.classList.add('added');
-        setTimeout(() => {
-            btn.innerHTML = "❤️ Add to My List";
-            btn.classList.remove('added');
-        }, 2000);
+    window.addToCart = function(id) {
+        const item = flatMenu.find(i => i.id === id);
+        if (!item) return;
+
+        const existing = cart.find(c => c.item.id === id);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ item: item, quantity: 1 });
+        }
+
+        // Update button UI
+        const btn = document.getElementById('btn-add-cart');
+        if(btn) {
+            btn.innerHTML = translations[currentLang].added;
+            btn.classList.add('added');
+        }
+
+        updateCartBadge();
+        setTimeout(() => { closeModal('detail-modal'); }, 800);
     }
 
-    // Close modal when clicking outside
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('active');
+    function updateCartBadge() {
+        const count = cart.reduce((total, c) => total + c.quantity, 0);
+        document.getElementById('cart-count').innerText = count;
+    }
+
+    window.openCart = function() {
+        renderCart();
+        cartModal.classList.add('active');
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cart-items-container');
+        const totalContainer = document.getElementById('cart-total-container');
+        const totalPrice = document.getElementById('cart-total-price');
+        const t = translations[currentLang];
+
+        if (cart.length === 0) {
+            container.innerHTML = `<div class="empty-cart">${t.emptyCart}</div>`;
+            totalContainer.style.display = 'none';
+            return;
         }
+
+        let html = '';
+        let total = 0;
+
+        cart.forEach(c => {
+            const name = currentLang === 'en' ? c.item.name_en : c.item.name_ar;
+            const itemTotal = c.item.price * c.quantity;
+            total += itemTotal;
+
+            html += `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-title">${name}</span>
+                        <span class="cart-item-price">${c.item.price} EGP x ${c.quantity} = ${itemTotal} EGP</span>
+                    </div>
+                    <div class="cart-controls">
+                        <button class="qty-btn" onclick="updateQuantity('${c.item.id}', -1)">-</button>
+                        <span>${c.quantity}</span>
+                        <button class="qty-btn" onclick="updateQuantity('${c.item.id}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        totalContainer.style.display = 'flex';
+        totalPrice.innerText = `${total} EGP`;
+    }
+
+    window.updateQuantity = function(id, change) {
+        const existing = cart.find(c => c.item.id === id);
+        if (!existing) return;
+
+        existing.quantity += change;
+        if (existing.quantity <= 0) {
+            cart = cart.filter(c => c.item.id !== id);
+        }
+        updateCartBadge();
+        renderCart();
+    }
+
+    window.closeModal = function(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    window.openFullMenu = function() {
+        document.getElementById('full-menu-modal').classList.add('active');
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
     });
 
-    // --- 7. EVENT LISTENERS ---
-    budgetSlider.addEventListener('input', (e) => {
-        budgetDisplay.textContent = `${e.target.value} EGP`;
-        filterMenu();
-    });
-
+    // Event Listeners
+    budgetSlider.addEventListener('input', filterMenu);
     tempSelect.addEventListener('change', filterMenu);
-    
-    prefTags.forEach(cb => {
-        cb.addEventListener('change', filterMenu);
-    });
 
-    // Initial render
+    // Initial Render
     filterMenu();
-
 </script>
 </body>
 </html>
