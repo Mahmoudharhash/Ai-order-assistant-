@@ -111,15 +111,6 @@
         }
         html[dir="rtl"] select { background-image: none; padding-left: 16px; }
 
-        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; }
-        .pill-checkbox { display: none; }
-        .pill-label {
-            padding: 8px 16px; border-radius: 20px; border: 1px solid #E0E0E0;
-            font-size: 0.75rem; font-weight: 500; color: var(--brand-gray); cursor: pointer;
-            transition: all 0.2s ease; background-color: white;
-        }
-        .pill-checkbox:checked + .pill-label { background-color: var(--brand-dark); color: white; border-color: var(--brand-dark); }
-
         /* Results */
         .results-container { padding: 0 20px; }
         .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -310,537 +301,228 @@
 
 <script>
     // ==========================================
-    // 1. DATA PROCESSING (Paste your full JSON here)
+    // 1. THE MENU DATA (Your provided JSON)
     // ==========================================
-    // Paste the exact JSON object you provided inside these curly brackets.
     const rawVayaData = {
-        "cafe_name": "Vaya Cafe",
-        "menu": [
-            {
   "cafe_name": "Vaya Cafe",
   "menu": [
     {
-      "category_en": "Classics Coffee",
-      "category_ar": "كلاسيك كوفي",
+      "category_en": "Classics Coffee", "category_ar": "كلاسيك كوفي",
       "items": [
-        {
-          "name_en": "Single Espresso",
-          "name_ar": "اسبريسو سنجل",
-          "price": 50,
-          "description_en": "Rich and bold single shot of pure espresso.",
-          "description_ar": "جرعة مركزة وغنية من الإسبريسو الصافي."
-        },
-        {
-          "name_en": "Double Espresso",
-          "name_ar": "اسبريسو دبل",
-          "price": 60,
-          "description_en": "Double shot of intense and aromatic espresso.",
-          "description_ar": "جرعة مضاعفة من الإسبريسو القوي والغني بالعطر."
-        },
-        {
-          "name_en": "Macchiato",
-          "name_ar": "ماكياتو",
-          "price": 75,
-          "description_en": "Espresso topped with a dollop of foamed milk.",
-          "description_ar": "إسبريسو مضاف إليه لمسة من رغوة الحليب."
-        },
-        {
-          "name_en": "Cortado",
-          "name_ar": "كورتادو",
-          "price": 70,
-          "description_en": "Equal parts of espresso and warm textured milk.",
-          "description_ar": "مقادير متساوية من الإسبريسو والحليب الدافئ."
-        },
-        {
-          "name_en": "Flat White",
-          "name_ar": "فلات وايت",
-          "price": 80,
-          "description_en": "Smooth espresso combined with velvety microfoam milk.",
-          "description_ar": "إسبريسو ناعم ممزوج برغوة الحليب المخملية الدقيقة."
-        },
-        {
-          "name_en": "Americano",
-          "name_ar": "أمريكانو",
-          "price": 65,
-          "description_en": "Espresso diluted with hot water for a smooth coffee experience.",
-          "description_ar": "إسبريسو مخفف بالماء الساخن لتجربة قهوة خفيفة وسلسة."
-        },
-        {
-          "name_en": "Single Turkish Coffee",
-          "name_ar": "قهوة تركي سنجل",
-          "price": 35,
-          "description_en": "Traditional finely ground Turkish coffee brewed in a cezve.",
-          "description_ar": "قهوة تركية مطحونة بدقة ومحضرة بالطريقة التقليدية."
-        },
-        {
-          "name_en": "Double Turkish Coffee",
-          "name_ar": "قهوة تركي دبل",
-          "price": 40,
-          "description_en": "Double portion of traditional rich Turkish coffee.",
-          "description_ar": "حصة مضاعفة من القهوة التركية الغنية التقليدية."
-        },
-        {
-          "name_en": "Farsawy Coffee",
-          "name_ar": "قهوة فرساوي",
-          "price": 50,
-          "description_en": "Authentic local specialty-style traditional coffee.",
-          "description_ar": "قهوة تقليدية أصيلة على الطريقة الفرساوي المميزة."
-        },
-        {
-          "name_en": "Hazelnut Coffee",
-          "name_ar": "قهوة بندق",
-          "price": 55,
-          "description_en": "Classic coffee infused with delicious roasted hazelnut flavor.",
-          "description_ar": "قهوة كلاسيكية نكهة البندق المحمص اللذيذ."
-        },
-        {
-          "name_en": "Cappuccino",
-          "name_ar": "كابتشينو",
-          "price": 75,
-          "description_en": "Equal parts of espresso, steamed milk, and thick milk foam.",
-          "description_ar": "أجزاء متساوية من الإسبريسو، الحليب المبخر، ورغوة الحليب الكثيفة."
-        },
-        {
-          "name_en": "Latte",
-          "name_ar": "لاتيه",
-          "price": 80,
-          "description_en": "Espresso with a generous amount of steamed milk and light foam.",
-          "description_ar": "إسبريسو مع كمية وفيرة من الحليب المبخر ورغوة خفيفة."
-        },
-        {
-          "name_en": "Spanish Latte",
-          "name_ar": "سبانيش لاتيه",
-          "price": 90,
-          "description_en": "Sweet and creamy espresso latte with condensed milk.",
-          "description_ar": "لاتيه إسبريسو حلو وكريمي بالحليب المحلى المكثف."
-        },
-        {
-          "name_en": "Caramel Latte",
-          "name_ar": "كراميل لاتيه",
-          "price": 90,
-          "description_en": "Smooth latte sweetened with rich caramel syrup.",
-          "description_ar": "لاتيه ناعم محلى بشراب الكراميل الغني."
-        },
-        {
-          "name_en": "Nutella Latte",
-          "name_ar": "نوتيلا لاتيه",
-          "price": 90,
-          "description_en": "Luxurious latte blended with rich Nutella chocolate spread.",
-          "description_ar": "لاتيه فاخر ممزوج بشوكولاتة النوتيلا الغنية."
-        },
-        {
-          "name_en": "Mocha Latte",
-          "name_ar": "موكا لاتيه",
-          "price": 90,
-          "description_en": "A delicious blend of espresso, chocolate, and steamed milk.",
-          "description_ar": "مزيج لذيذ من الإسبريسو، الشوكولاتة، والحليب المبخر."
-        },
-        {
-          "name_en": "Salted Caramel",
-          "name_ar": "كراميل مملح",
-          "price": 90,
-          "description_en": "Sweet caramel latte accented with a touch of sea salt.",
-          "description_ar": "لاتيه كراميل حلو مع لمسة خفيفة من الملح البحري."
-        },
-        {
-          "name_en": "Lotus Latte",
-          "name_ar": "لوتس لاتيه",
-          "price": 75,
-          "description_en": "Latte infused with spiced Lotus Biscoff flavor and spread.",
-          "description_ar": "لاتيه بنكهة وعجينة بسكويت اللوتس المقرمش."
-        },
-        {
-          "name_en": "Nescafé",
-          "name_ar": "نسكافيه",
-          "price": 50,
-          "description_en": "Classic instant coffee prepared with hot milk or water.",
-          "description_ar": "قهوة سريعة الذوبان تقليدية محضرة بالحليب أو الماء الساخن."
-        }
+        { "name_en": "Single Espresso", "name_ar": "اسبريسو سنجل", "price": 50, "description_en": "Rich and bold single shot.", "description_ar": "جرعة مركزة وغنية." },
+        { "name_en": "Double Espresso", "name_ar": "اسبريسو دبل", "price": 60, "description_en": "Double shot of intense espresso.", "description_ar": "جرعة مضاعفة من الإسبريسو القوي." },
+        { "name_en": "Macchiato", "name_ar": "ماكياتو", "price": 75, "description_en": "Espresso with foamed milk.", "description_ar": "إسبريسو مع رغوة الحليب." },
+        { "name_en": "Cortado", "name_ar": "كورتادو", "price": 70, "description_en": "Espresso and warm milk.", "description_ar": "إسبريسو وحليب دافئ." },
+        { "name_en": "Flat White", "name_ar": "فلات وايت", "price": 80, "description_en": "Smooth espresso with microfoam.", "description_ar": "إسبريسو ناعم مع رغوة دقيقة." },
+        { "name_en": "Americano", "name_ar": "أمريكانو", "price": 65, "description_en": "Espresso diluted with hot water.", "description_ar": "إسبريسو مخفف بالماء الساخن." },
+        { "name_en": "Single Turkish Coffee", "name_ar": "قهوة تركي سنجل", "price": 35, "description_en": "Traditional Turkish coffee.", "description_ar": "قهوة تركية تقليدية." },
+        { "name_en": "Double Turkish Coffee", "name_ar": "قهوة تركي دبل", "price": 40, "description_en": "Double Turkish coffee.", "description_ar": "قهوة تركية دبل." },
+        { "name_en": "Farsawy Coffee", "name_ar": "قهوة فرساوي", "price": 50, "description_en": "Authentic local specialty coffee.", "description_ar": "قهوة فرساوي أصيلة." },
+        { "name_en": "Hazelnut Coffee", "name_ar": "قهوة بندق", "price": 55, "description_en": "Coffee with roasted hazelnut.", "description_ar": "قهوة بنكهة البندق." },
+        { "name_en": "Cappuccino", "name_ar": "كابتشينو", "price": 75, "description_en": "Espresso, milk, and foam.", "description_ar": "إسبريسو، حليب، ورغوة." },
+        { "name_en": "Latte", "name_ar": "لاتيه", "price": 80, "description_en": "Espresso with steamed milk.", "description_ar": "إسبريسو مع حليب مبخر." },
+        { "name_en": "Spanish Latte", "name_ar": "سبانيش لاتيه", "price": 90, "description_en": "Sweet latte with condensed milk.", "description_ar": "لاتيه حلو بالحليب المكثف." },
+        { "name_en": "Caramel Latte", "name_ar": "كراميل لاتيه", "price": 90, "description_en": "Latte with caramel syrup.", "description_ar": "لاتيه مع شراب الكراميل." },
+        { "name_en": "Nutella Latte", "name_ar": "نوتيلا لاتيه", "price": 90, "description_en": "Latte with Nutella.", "description_ar": "لاتيه مع نوتيلا." },
+        { "name_en": "Mocha Latte", "name_ar": "موكا لاتيه", "price": 90, "description_en": "Espresso, chocolate, and milk.", "description_ar": "إسبريسو، شوكولاتة، وحليب." },
+        { "name_en": "Salted Caramel", "name_ar": "كراميل مملح", "price": 90, "description_en": "Caramel latte with sea salt.", "description_ar": "لاتيه كراميل مع ملح البحر." },
+        { "name_en": "Lotus Latte", "name_ar": "لوتس لاتيه", "price": 75, "description_en": "Latte with Lotus Biscoff.", "description_ar": "لاتيه مع لوتس." },
+        { "name_en": "Nescafé", "name_ar": "نسكافيه", "price": 50, "description_en": "Classic instant coffee.", "description_ar": "نسكافيه كلاسيك." }
       ]
     },
     {
-      "category_en": "Signature Drinks",
-      "category_ar": "مشروبات مميزة",
+      "category_en": "Signature Drinks", "category_ar": "مشروبات مميزة",
       "items": [
-        {
-          "name_en": "Ice Coffee",
-          "name_ar": "ايس كوفي",
-          "price": 95,
-          "description_en": "Chilled refreshing coffee served over ice cubes.",
-          "description_ar": "قهوة باردة ومنعشة تقدم فوق مكعبات الثلج."
-        },
-        {
-          "name_en": "Ice Mocha",
-          "name_ar": "ايس موكا",
-          "price": 95,
-          "description_en": "Cold blend of espresso, chocolate, milk, and ice.",
-          "description_ar": "مزيج بارد من الإسبريسو، الشوكولاتة، الحليب، والثلج."
-        },
-        {
-          "name_en": "Caramel Macchiato",
-          "name_ar": "كراميل ميكاتو",
-          "price": 95,
-          "description_en": "Layered iced coffee with vanilla, milk, espresso, and caramel drizzle.",
-          "description_ar": "قهوة مثلجة طبقات بالفانيليا، الحليب، الإسبريسو، وصوص الكراميل."
-        },
-        {
-          "name_en": "Ice Latte",
-          "name_ar": "ايس لاتيه",
-          "price": 75,
-          "description_en": "Refreshing cold milk and espresso over ice.",
-          "description_ar": "حليب بارد منعش مع الإسبريسو فوق الثلج."
-        },
-        {
-          "name_en": "Ice White Mocha",
-          "name_ar": "ايس وايت موكا",
-          "price": 85,
-          "description_en": "Chilled creamy blend of white chocolate, espresso, and milk.",
-          "description_ar": "مزيج كريمي بارد من الشوكولاتة البيضاء، الإسبريسو، والحليب."
-        },
-        {
-          "name_en": "Ice Salted Caramel",
-          "name_ar": "ايس سولد ت كاراميل",
-          "price": 90,
-          "description_en": "Cold sweet caramel coffee with a hint of salt over ice.",
-          "description_ar": "قهوة باردة بكراميل حلو مع لمسة ملح فوق الثلج."
-        },
-        {
-          "name_en": "Ice Spanish Latte",
-          "name_ar": "ايس اسبانش لاتيه",
-          "price": 80,
-          "description_en": "Sweet iced latte made with rich condensed milk and espresso.",
-          "description_ar": "لاتيه مثلج وحلو مصنوع من الحليب المحلى المكثف والإسبريسو."
-        },
-        {
-          "name_en": "Ice Pistachio Latte",
-          "name_ar": "ايس بيستاشيو لاتيه",
-          "price": 90,
-          "description_en": "Cold creamy espresso latte infused with rich pistachio flavor.",
-          "description_ar": "لاتيه إسبريسو كريمي بارد نكهة الفستق الغني."
-        },
-        {
-          "name_en": "Ice Americano",
-          "name_ar": "ايس امريكانو",
-          "price": 60,
-          "description_en": "Espresso poured over cold water and ice for a crisp taste.",
-          "description_ar": "إسبريسو مسكوب فوق الماء البارد والثلج لمذاق منعش وخفيف."
-        },
-        {
-          "name_en": "Affogato Coffee",
-          "name_ar": "افجاتو كوفي",
-          "price": 60,
-          "description_en": "A scoop of vanilla ice cream drowned with a hot shot of espresso.",
-          "description_ar": "كرة من آيس كريم الفانيليا مغطاة بجرعة ساخنة من الإسبريسو."
-        }
+        { "name_en": "Ice Coffee", "name_ar": "ايس كوفي", "price": 95, "description_en": "Chilled refreshing coffee.", "description_ar": "قهوة باردة ومنعشة." },
+        { "name_en": "Ice Mocha", "name_ar": "ايس موكا", "price": 95, "description_en": "Cold espresso, chocolate, and milk.", "description_ar": "إسبريسو بارد، شوكولاتة، وحليب." },
+        { "name_en": "Caramel Macchiato", "name_ar": "كراميل ميكاتو", "price": 95, "description_en": "Layered iced coffee with caramel.", "description_ar": "قهوة مثلجة طبقات مع كراميل." },
+        { "name_en": "Ice Latte", "name_ar": "ايس لاتيه", "price": 75, "description_en": "Cold milk and espresso.", "description_ar": "حليب بارد وإسبريسو." },
+        { "name_en": "Ice White Mocha", "name_ar": "ايس وايت موكا", "price": 85, "description_en": "White chocolate, espresso, and milk.", "description_ar": "شوكولاتة بيضاء، إسبريسو، وحليب." },
+        { "name_en": "Ice Salted Caramel", "name_ar": "ايس سولد ت كاراميل", "price": 90, "description_en": "Cold caramel coffee with salt.", "description_ar": "قهوة باردة بكراميل وملح." },
+        { "name_en": "Ice Spanish Latte", "name_ar": "ايس اسبانش لاتيه", "price": 80, "description_en": "Sweet iced latte with condensed milk.", "description_ar": "لاتيه مثلج حلو بحليب مكثف." },
+        { "name_en": "Ice Pistachio Latte", "name_ar": "ايس بيستاشيو لاتيه", "price": 90, "description_en": "Cold creamy espresso with pistachio.", "description_ar": "إسبريسو بارد كريمي مع فستق." },
+        { "name_en": "Ice Americano", "name_ar": "ايس امريكانو", "price": 60, "description_en": "Espresso over cold water and ice.", "description_ar": "إسبريسو فوق ماء بارد وثلج." },
+        { "name_en": "Affogato Coffee", "name_ar": "افجاتو كوفي", "price": 60, "description_en": "Vanilla ice cream with hot espresso.", "description_ar": "آيس كريم فانيليا مع إسبريسو ساخن." }
       ]
     },
     {
-      "category_en": "Hot Drinks",
-      "category_ar": "مشروبات ساخنة",
+      "category_en": "Hot Drinks", "category_ar": "مشروبات ساخنة",
       "items": [
-        {
-          "name_en": "Tea",
-          "name_ar": "شاي",
-          "price": 20,
-          "description_en": "Classic hot brewed black tea.",
-          "description_ar": "شاي أسود ساخن ومخمر بالطريقة التقليدية."
-        },
-        {
-          "name_en": "Green Tea",
-          "name_ar": "شاي أخضر",
-          "price": 30,
-          "description_en": "Soothing and healthy hot green tea infusion.",
-          "description_ar": "شاي أخضر ساخن ومريح وصحي."
-        },
-        {
-          "name_en": "Tea with Milk",
-          "name_ar": "شاي بالحليب",
-          "price": 35,
-          "description_en": "Hot black tea blended with warm creamy milk.",
-          "description_ar": "شاي أسود ساخن ممزوج بالحليب الدافئ الكريمي."
-        },
-        {
-          "name_en": "Herbs",
-          "name_ar": "الأعشاب Herbs",
-          "price": 30,
-          "description_en": "A calming selection of natural hot herbal infusion.",
-          "description_ar": "تشكيلة مهدئة من الأعشاب الطبيعية الساخنة."
-        },
-        {
-          "name_en": "Hot Cider",
-          "name_ar": "هوت سايدر",
-          "price": 40,
-          "description_en": "Warm spiced apple cider drink.",
-          "description_ar": "مشروب عصير التفاح الساخن والمتبل."
-        },
-        {
-          "name_en": "Cinnamon Milk",
-          "name_ar": "قرفة حليب",
-          "price": 50,
-          "description_en": "Warm comforting milk infused with aromatic cinnamon.",
-          "description_ar": "حليب دافئ ومريح منكه بالقرفة العطرية."
-        },
-        {
-          "name_en": "Fruit Tea",
-          "name_ar": "شاي فواكه",
-          "price": 30,
-          "description_en": "Hot flavorful tea infused with mixed fruit extracts.",
-          "description_ar": "شاي ساخن ونكهة غنية بخلاصات الفواكه المشكلة."
-        },
-        {
-          "name_en": "Sahlab",
-          "name_ar": "سحلب",
-          "price": 60,
-          "description_en": "Traditional thick warm milky Egyptian winter drink.",
-          "description_ar": "مشروب شتوي مصري تقليدي حار وكثيف بالحليب."
-        },
-        {
-          "name_en": "Sahlab with Nuts",
-          "name_ar": "سحلب مكسرات",
-          "price": 70,
-          "description_en": "Traditional hot sahlab topped with crunchy mixed nuts.",
-          "description_ar": "سحلب ساخن تقليدي مغطى بالمكسرات المشكلة المقرمشة."
-        },
-        {
-          "name_en": "Hot Chocolate",
-          "name_ar": "هوت شوكلت",
-          "price": 55,
-          "description_en": "Rich and creamy hot chocolate drink.",
-          "description_ar": "مشروب شوكولاتة ساخن غني وكريمي."
-        },
-        {
-          "name_en": "Hot Marshmallow",
-          "name_ar": "هوت مارشميلو",
-          "price": 65,
-          "description_en": "Hot chocolate topped with melted sweet marshmallows.",
-          "description_ar": "شوكولاتة ساخنة مغطاة بقطع المارشميلو الحلوة الذائبة."
-        },
-        {
-          "name_en": "Hot Espresso",
-          "name_ar": "هوت اسبريسو",
-          "price": 70,
-          "description_en": "Warm and intense hot espresso preparation.",
-          "description_ar": "تحضير إسبريسو ساخن وقوي."
-        },
-        {
-          "name_en": "Hot Chocolate with Nuts",
-          "name_ar": "هوت شوكلت مكسرات",
-          "price": 80,
-          "description_en": "Rich hot chocolate garnished with crunchy mixed nuts.",
-          "description_ar": "شوكولاتة ساخنة غنية مزينة بالمكسرات المقرمشة."
-        }
+        { "name_en": "Tea", "name_ar": "شاي", "price": 20, "description_en": "Classic hot black tea.", "description_ar": "شاي أسود ساخن." },
+        { "name_en": "Green Tea", "name_ar": "شاي أخضر", "price": 30, "description_en": "Hot green tea.", "description_ar": "شاي أخضر ساخن." },
+        { "name_en": "Tea with Milk", "name_ar": "شاي بالحليب", "price": 35, "description_en": "Black tea with milk.", "description_ar": "شاي أسود بالحليب." },
+        { "name_en": "Herbs", "name_ar": "الأعشاب", "price": 30, "description_en": "Hot herbal infusion.", "description_ar": "أعشاب ساخنة." },
+        { "name_en": "Hot Cider", "name_ar": "هوت سايدر", "price": 40, "description_en": "Warm spiced apple cider.", "description_ar": "عصير تفاح ساخن ومتبل." },
+        { "name_en": "Cinnamon Milk", "name_ar": "قرفة حليب", "price": 50, "description_en": "Milk with cinnamon.", "description_ar": "حليب بالقرفة." },
+        { "name_en": "Fruit Tea", "name_ar": "شاي فواكه", "price": 30, "description_en": "Hot fruit tea.", "description_ar": "شاي فواكه ساخن." },
+        { "name_en": "Sahlab", "name_ar": "سحلب", "price": 60, "description_en": "Traditional hot sahlab.", "description_ar": "سحلب ساخن تقليدي." },
+        { "name_en": "Sahlab with Nuts", "name_ar": "سحلب مكسرات", "price": 70, "description_en": "Sahlab with mixed nuts.", "description_ar": "سحلب مع مكسرات." },
+        { "name_en": "Hot Chocolate", "name_ar": "هوت شوكلت", "price": 55, "description_en": "Creamy hot chocolate.", "description_ar": "شوكولاتة ساخنة كريمية." },
+        { "name_en": "Hot Marshmallow", "name_ar": "هوت مارشميلو", "price": 65, "description_en": "Hot chocolate with marshmallows.", "description_ar": "شوكولاتة ساخنة مع مارشميلو." },
+        { "name_en": "Hot Espresso", "name_ar": "هوت اسبريسو", "price": 70, "description_en": "Hot espresso.", "description_ar": "إسبريسو ساخن." },
+        { "name_en": "Hot Chocolate with Nuts", "name_ar": "هوت شوكلت مكسرات", "price": 80, "description_en": "Hot chocolate with nuts.", "description_ar": "شوكولاتة ساخنة مع مكسرات." }
       ]
     },
     {
-      "category_en": "Milkshake",
-      "category_ar": "ميلك شيك",
+      "category_en": "Milkshake", "category_ar": "ميلك شيك",
       "items": [
-        {
-          "name_en": "Milkshake (Caramel, Mango, Strawberry, Mocha, Oreo)",
-          "name_ar": "ميلك شيك (كراميل - مانجو - فراولة - موكا - أوريو)",
-          "price": 95,
-          "description_en": "Thick and creamy milkshake blended with your choice of flavor.",
-          "description_ar": "ميلك شيك سميك وكريمي ممزوج بالنكهة التي تختيرها."
-        },
-        {
-          "name_en": "Milkshake (Kinder, Nescafé)",
-          "name_ar": "ميلك شيك (كيندر - نسكافيه)",
-          "price": 100,
-          "description_en": "Rich milkshake flavored with Kinder chocolate or Nescafé.",
-          "description_ar": "ميلك شيك غني بنكهة شوكولاتة كيندر أو النسكافيه."
-        },
-        {
-          "name_en": "Milkshake (Vanilla, Blueberry, Caramel Nuts, Popcorn, Snickers, Pistachio)",
-          "name_ar": "ميلك شيك (فانيليا - بلوبيري - كراميل مكسرات - فشار - سنيكرز - فستق)",
-          "price": 110,
-          "description_en": "Deluxe thick milkshake blended with premium specialty flavors.",
-          "description_ar": "ميلك شيك فاخر وسميك ممزوج بنكهات مميزة وخاصة."
-        }
+        { "name_en": "Milkshake (Caramel, Mango, Strawberry, Mocha, Oreo)", "name_ar": "ميلك شيك (كراميل - مانجو - فراولة - موكا - أوريو)", "price": 95, "description_en": "Thick creamy milkshake.", "description_ar": "ميلك شيك سميك وكريمي." },
+        { "name_en": "Milkshake (Kinder, Nescafé)", "name_ar": "ميلك شيك (كيندر - نسكافيه)", "price": 100, "description_en": "Milkshake with Kinder or Nescafé.", "description_ar": "ميلك شيك بنكهة كيندر أو نسكافيه." },
+        { "name_en": "Milkshake (Vanilla, Blueberry, Caramel Nuts, Popcorn, Snickers, Pistachio)", "name_ar": "ميلك شيك (فانيليا - بلوبيري - كراميل مكسرات - فشار - سنيكرز - فستق)", "price": 110, "description_en": "Deluxe milkshake with premium flavors.", "description_ar": "ميلك شيك فاخر بنكهات مميزة." }
       ]
     },
     {
-      "category_en": "Cocktail",
-      "category_ar": "كوكتيل",
+      "category_en": "Cocktail", "category_ar": "كوكتيل",
       "items": [
-        {
-          "name_en": "Vaya Cocktail",
-          "name_ar": "فايا",
-          "price": 90,
-          "description_en": "Vaya signature special fruit cocktail blend.",
-          "description_ar": "مزيج كوكتيل الفواكه الخاص والمميز من فايا."
-        },
-        {
-          "name_en": "Velvet Green",
-          "name_ar": "فيلفيد جرين",
-          "price": 90,
-          "description_en": "Smooth and refreshing green fruit cocktail.",
-          "description_ar": "كوكتيل فواكه أخضر ناعم ومنعش."
-        },
-        {
-          "name_en": "Pink Monkey",
-          "name_ar": "بنك مانكي",
-          "price": 90,
-          "description_en": "Sweet and fruity pink specialty cocktail blend.",
-          "description_ar": "مزيج كوكتيل وردي حلو وفواكهي خاص."
-        },
-        {
-          "name_en": "Pina Colada",
-          "name_ar": "بينا كولادا",
-          "price": 90,
-          "description_en": "Tropical blend of creamy coconut and sweet pineapple.",
-          "description_ar": "مزيج استوائي من جوز الهند الكريمي والأناناس الحلو."
-        },
-        {
-          "name_en": "Mango & Passion Fruit",
-          "name_ar": "مانجو وباشن فروت",
-          "price": 90,
-          "description_en": "Exotic fusion of sweet mango and tangy passion fruit.",
-          "description_ar": "مزيج استوائي غريب من المانجو الحلوة والباشن فروت المنعشة."
-        },
-        {
-          "name_en": "Mango & Peach",
-          "name_ar": "مانجو وخوخ",
-          "price": 90,
-          "description_en": "Delicious smoothie mix of ripe mango and juicy peach.",
-          "description_ar": "مزيج لذيذ من المانجو الناضجة والخوخ العصيري."
-        },
-        {
-          "name_en": "Mango & Pineapple",
-          "name_ar": "مانجو وأناناس",
-          "price": 90,
-          "description_en": "Refreshing tropical combination of mango and pineapple juice.",
-          "description_ar": "مزيج استوائي منعش من عصير المانجو والأناناس."
-        },
-        {
-          "name_en": "Triple Vibe (New)",
-          "name_ar": "تريبل فايب (جديد)",
-          "price": 100,
-          "description_en": "Mango x strawberry x banana milk tropical blend.",
-          "description_ar": "مزيج استوائي من مانجو × فراولة × حليب موز."
-        }
+        { "name_en": "Vaya Cocktail", "name_ar": "فايا", "price": 90, "description_en": "Vaya special fruit cocktail.", "description_ar": "كوكتيل فواكه فايا الخاص." },
+        { "name_en": "Velvet Green", "name_ar": "فيلفيد جرين", "price": 90, "description_en": "Green fruit cocktail.", "description_ar": "كوكتيل فواكه أخضر." },
+        { "name_en": "Pink Monkey", "name_ar": "بنك مانكي", "price": 90, "description_en": "Pink fruity cocktail.", "description_ar": "كوكتيل وردي فواكهي." },
+        { "name_en": "Pina Colada", "name_ar": "بينا كولادا", "price": 90, "description_en": "Coconut and pineapple.", "description_ar": "جوز الهند والأناناس." },
+        { "name_en": "Mango & Passion Fruit", "name_ar": "مانجو وباشن فروت", "price": 90, "description_en": "Mango and passion fruit.", "description_ar": "مانجو وباشن فروت." },
+        { "name_en": "Mango & Peach", "name_ar": "مانجو وخوخ", "price": 90, "description_en": "Mango and peach.", "description_ar": "مانجو وخوخ." },
+        { "name_en": "Mango & Pineapple", "name_ar": "مانجو وأناناس", "price": 90, "description_en": "Mango and pineapple.", "description_ar": "مانجو وأناناس." },
+        { "name_en": "Triple Vibe (New)", "name_ar": "تريبل فايب (جديد)", "price": 100, "description_en": "Mango, strawberry, banana milk.", "description_ar": "مانجو، فراولة، حليب موز." }
       ]
     },
     {
-      "category_en": "Coffee Blended",
-      "category_ar": "كوفي بلندد",
+      "category_en": "Coffee Blended", "category_ar": "كوفي بلندد",
       "items": [
-        {
-          "name_en": "Spanish Frappuccino",
-          "name_ar": "فرابتشينو اسبانش",
-          "price": 85,
-          "description_en": "Blended iced coffee with Spanish latte condensed milk flavor.",
-          "description_ar": "قهوة مثلجة مخفوقة بنكهة الحليب المكثف للسبانيش لاتيه."
-        },
-        {
-          "name_en": "Caramel Frappuccino",
-          "name_ar": "فرابتشينو كراميل",
-          "price": 85,
-          "description_en": "Blended iced coffee with rich caramel syrup and whipped cream.",
-          "description_ar": "قهوة مثلجة مخفوقة بشراب الكراميل الغني والكريمة المخفوقة."
-        },
-        {
-          "name_en": "Mocha Frappuccino",
-          "name_ar": "فرابتشينو موكا",
-          "price": 85,
-          "description_en": "Blended iced coffee with chocolate and milk.",
-          "description_ar": "قهوة مثلجة مخفوقة بالشوكولاتة والحليب."
-        },
-        {
-          "name_en": "White Mocha Frappuccino",
-          "name_ar": "فرابتشينو وايت موكا",
-          "price": 85,
-          "description_en": "Blended iced coffee with sweet white chocolate.",
-          "description_ar": "قهوة مثلجة مخفوقة بالشوكولاتة البيضاء الحلوة."
-        },
-        {
-          "name_en": "Salted Caramel Frappuccino",
-          "name_ar": "فرابتشينو سولتت كراميل",
-          "price": 85,
-          "description_en": "Blended iced coffee with salted caramel flavor.",
-          "description_ar": "قهوة مثلجة مخفوقة بنكهة الكراميل المملح."
-        }
+        { "name_en": "Spanish Frappuccino", "name_ar": "فرابتشينو اسبانش", "price": 85, "description_en": "Blended Spanish latte.", "description_ar": "سبانيش لاتيه مخفوق." },
+        { "name_en": "Caramel Frappuccino", "name_ar": "فرابتشينو كراميل", "price": 85, "description_en": "Blended caramel coffee.", "description_ar": "قهوة كراميل مخفوقة." },
+        { "name_en": "Mocha Frappuccino", "name_ar": "فرابتشينو موكا", "price": 85, "description_en": "Blended mocha coffee.", "description_ar": "قهوة موكا مخفوقة." },
+        { "name_en": "White Mocha Frappuccino", "name_ar": "فرابتشينو وايت موكا", "price": 85, "description_en": "Blended white mocha.", "description_ar": "وايت موكا مخفوقة." },
+        { "name_en": "Salted Caramel Frappuccino", "name_ar": "فرابتشينو سولتت كراميل", "price": 85, "description_en": "Blended salted caramel.", "description_ar": "كراميل مملح مخفوق." }
       ]
     },
     {
-      "category_en": "Non-Coffee Blended",
-      "category_ar": "نون كوفي بلندد",
+      "category_en": "Non-Coffee Blended", "category_ar": "نون كوفي بلندد",
       "items": [
-        {
-          "name_en": "Caramel Frappé",
-          "name_ar": "فرابيه كراميل",
-          "price": 75,
-          "description_en": "Creamy ice-blended beverage with sweet caramel flavor.",
-          "description_ar": "مشروب مثلج ومخفوق كريمي بنكهة الكراميل الحلو."
-        },
-        {
-          "name_en": "Strawberry Frappé",
-          "name_ar": "فرابيه الفراولة",
-          "price": 85,
-          "description_en": "Blended ice drink with sweet strawberry flavor.",
-          "description_ar": "مشروب ثلجي مخفوق بنكهة الفراولة الحلوة."
-        },
-        {
-          "name_en": "Mixed Berry Frappé",
-          "name_ar": "فرابيه مكس بيري",
-          "price": 85,
-          "description_en": "Blended ice drink with assorted forest berry flavors.",
-          "description_ar": "مشروب ثلجي مخفوق بنكهات التوت المشكل."
-        },
-        {
-          "name_en": "Vanilla Frappé",
-          "name_ar": "فرابيه الفانيليا",
-          "price": 75,
-          "description_en": "Smooth and creamy blended vanilla ice drink.",
-          "description_ar": "مشروب ثلجي مخفوق بالفانيليا ناعم وكريمي."
-        },
-        {
-          "name_en": "Coconut Frappé",
-          "name_ar": "فرابيه جوز الهند",
-          "price": 75,
-          "description_en": "Tropical blended ice drink with coconut flavor.",
-          "description_ar": "مشروب ثلجي مخفوق استوائي بنكهة جوز الهند."
-        },
-        {
-          "name_en": "Mocha Frappé",
-          "name_ar": "فرابيه موكا",
-          "price": 75,
-          "description_en": "Blended ice drink with chocolate and milk without coffee.",
-          "description_ar": "مشروب ثلجي مخفوق بالشوكولاتة والحليب بدون قهوة."
-        },
-        {
-          "name_en": "Berry Frappé",
-          "name_ar": "فرابيه بيري",
-          "price": 85,
-          "description_en": "Refreshing blended ice drink with berry flavor.",
-          "description_ar": "مشروب ثلجي مخفوق ومنعش بنكهة التوت."
-        }
+        { "name_en": "Caramel Frappé", "name_ar": "فرابيه كراميل", "price": 75, "description_en": "Creamy caramel ice blend.", "description_ar": "كراميل مثلج كريمي." },
+        { "name_en": "Strawberry Frappé", "name_ar": "فرابيه الفراولة", "price": 85, "description_en": "Strawberry ice blend.", "description_ar": "فراولة مثلجة مخفوقة." },
+        { "name_en": "Mixed Berry Frappé", "name_ar": "فرابيه مكس بيري", "price": 85, "description_en": "Mixed berry ice blend.", "description_ar": "توت مشكل مثلج مخفوق." },
+        { "name_en": "Vanilla Frappé", "name_ar": "فرابيه الفانيليا", "price": 75, "description_en": "Vanilla ice blend.", "description_ar": "فانيليا مثلجة مخفوقة." },
+        { "name_en": "Coconut Frappé", "name_ar": "فرابيه جوز الهند", "price": 75, "description_en": "Coconut ice blend.", "description_ar": "جوز الهند مثلج مخفوق." },
+        { "name_en": "Mocha Frappé", "name_ar": "فرابيه موكا", "price": 75, "description_en": "Chocolate mocha ice blend.", "description_ar": "موكا شوكولاتة مثلجة." },
+        { "name_en": "Berry Frappé", "name_ar": "فرابيه بيري", "price": 85, "description_en": "Berry ice blend.", "description_ar": "بيري مثلج مخفوق." }
       ]
     },
     {
-      "category_en": "Matcha",
-      "category_ar": "ماتشا",
+      "category_en": "Matcha", "category_ar": "ماتشا",
       "items": [
-        {
-          "name_en": "Iced Matcha Latte",
-          "name_ar": "ايس ماتشا لاتيه",
-          "price": 110,
-          "description_en": "Japanese green tea matcha powder shaken with milk and ice.",
-          "description_ar": "بودرة الشاي الأخضر الياباني ماتشا مخفوقة مع الحليب والثلج."
-        },
-        {
-          "name_en": "Iced Spanish Matcha",
-          "name_ar": "ايس اسبانش ماتشا",
-          "price": 125,
-          "description_en": "Iced matcha latte sweetened with rich condensed milk.",
-          "description_ar": "ماتشا لاتيه مثلج محلى بالحليب المكثف الغني."
-        },
-        {
-          "name_en": "Iced Blueberry Matcha",
-          "name_ar": "ايس ماتشا بلوبيري",
-          "price": 140,
-          "description_en": "Iced matcha latte layered wi
-        ]
-    };
+        { "name_en": "Iced Matcha Latte", "name_ar": "ايس ماتشا لاتيه", "price": 110, "description_en": "Matcha with milk and ice.", "description_ar": "ماتشا مع حليب وثلج." },
+        { "name_en": "Iced Spanish Matcha", "name_ar": "ايس اسبانش ماتشا", "price": 125, "description_en": "Matcha with condensed milk.", "description_ar": "ماتشا مع حليب مكثف." },
+        { "name_en": "Iced Blueberry Matcha", "name_ar": "ايس ماتشا بلوبيري", "price": 140, "description_en": "Matcha with blueberry.", "description_ar": "ماتشا مع بلوبيري." },
+        { "name_en": "Iced Strawberry Matcha", "name_ar": "ايس ماتشا فراولة", "price": 125, "description_en": "Matcha with strawberry.", "description_ar": "ماتشا مع فراولة." },
+        { "name_en": "Iced Cherry Matcha", "name_ar": "ايس ماتشا شيري", "price": 140, "description_en": "Matcha with cherry.", "description_ar": "ماتشا مع كرز." },
+        { "name_en": "Iced Mango Matcha", "name_ar": "ايس ماتشا مانجو", "price": 140, "description_en": "Matcha with mango.", "description_ar": "ماتشا مع مانجو." },
+        { "name_en": "Iced Mixed Berry Matcha", "name_ar": "ايس ماتشا مكس بيري", "price": 140, "description_en": "Matcha with mixed berries.", "description_ar": "ماتشا مع توت مشكل." }
+      ]
+    },
+    {
+      "category_en": "Boba Iced Tea", "category_ar": "بوبا أيس تي",
+      "items": [
+        { "name_en": "Boba Iced Tea (Passion Fruit, Cola, Mango / Mix Berry, Strawberry, Red Berries / Berry, Peach, Tangerine, Cherry)", "name_ar": "بوبا أيس تي (باشن فروت - كولا - مانجو / ميكس بيري - فراولة - توت أحمر / بيري - خوخ - يوسفي - كرز)", "price": 100, "description_en": "Iced tea with boba pearls.", "description_ar": "شاي مثلج مع حبوب البوبا." }
+      ]
+    },
+    {
+      "category_en": "Non-Coffee Refreshers", "category_ar": "ريفرشمنتس (منعشات بدون قهوة)",
+      "items": [
+        { "name_en": "Mango Juice", "name_ar": "مانجا", "price": 65, "description_en": "Fresh mango juice.", "description_ar": "عصير مانجو طازج." },
+        { "name_en": "Strawberry Juice", "name_ar": "فراولة", "price": 65, "description_en": "Fresh strawberry juice.", "description_ar": "عصير فراولة طازج." },
+        { "name_en": "Guava Juice", "name_ar": "جوافة", "price": 60, "description_en": "Fresh guava juice.", "description_ar": "عصير جوافة طازج." },
+        { "name_en": "Guava with Milk", "name_ar": "جوافة بلبن", "price": 70, "description_en": "Guava juice with milk.", "description_ar": "عصير جوافة بالحليب." },
+        { "name_en": "Banana with Milk", "name_ar": "موز بلبن", "price": 55, "description_en": "Banana milkshake.", "description_ar": "ميلك شيك موز." },
+        { "name_en": "Dates with Milk", "name_ar": "بلح بلبن", "price": 60, "description_en": "Dates and milk drink.", "description_ar": "مشروب التمر والحليب." },
+        { "name_en": "Watermelon Juice", "name_ar": "بطيخ", "price": 55, "description_en": "Fresh watermelon juice.", "description_ar": "عصير بطيخ طازج." },
+        { "name_en": "Kiwi Juice", "name_ar": "كيوي", "price": 90, "description_en": "Fresh kiwi juice.", "description_ar": "عصير كيوي طازج." },
+        { "name_en": "Lemon Juice", "name_ar": "ليمون", "price": 45, "description_en": "Fresh lemon juice.", "description_ar": "عصير ليمون طازج." },
+        { "name_en": "Lemon Mint", "name_ar": "ليمون نعناع", "price": 55, "description_en": "Lemon and mint juice.", "description_ar": "عصير ليمون ونعناع." },
+        { "name_en": "Avocado Juice", "name_ar": "افوكادو", "price": 100, "description_en": "Fresh avocado juice.", "description_ar": "عصير أفوكادو طازج." },
+        { "name_en": "Peach Juice", "name_ar": "خوخ", "price": 65, "description_en": "Fresh peach juice.", "description_ar": "عصير خوخ طازج." },
+        { "name_en": "Plum Juice", "name_ar": "برقوق", "price": 80, "description_en": "Fresh plum juice.", "description_ar": "عصير برقوق طازج." },
+        { "name_en": "Iced Tea", "name_ar": "ايس تي", "price": 65, "description_en": "Chilled flavored iced tea.", "description_ar": "شاي مثلج بنكهة الفواكه." },
+        { "name_en": "Prickly Pear", "name_ar": "تين شوكي", "price": 65, "description_en": "Fresh prickly pear juice.", "description_ar": "عصير تين شوكي طازج." }
+      ]
+    },
+    {
+      "category_en": "Mojito", "category_ar": "موهيتو",
+      "items": [
+        { "name_en": "Classic Mojito (Flavors: Strawberry, Red Berry, Berry, Passion Fruit, Mix Berry, Blue Hawaii, Hawaii, Blue Lemon, Cherry, Green Apple)", "name_ar": "موهيتو كلاسيك (النكهات: فراولة - توت أحمر - بيري - باشن فروت - ميكس بيري - بلو هاواي - هاواي - ليمون أزرق - كرز - تفاح أخضر)", "price": 85, "description_en": "Sparkling mojito with fruit.", "description_ar": "موهيتو فوار مع فواكه." },
+        { "name_en": "Special Mojito (Kiwi, Pineapple, Peach, Tangerine, Red Berry) (New)", "name_ar": "موهيتو خاص (كيوي - أناناس - خوخ - يوسفي - توت أحمر) (جديد)", "price": 125, "description_en": "Premium mojito blend.", "description_ar": "مزيج موهيتو فاخر." },
+        { "name_en": "Cherry Cola / Grenadine Mojito (New)", "name_ar": "شيري كولا - جراندينا (جديد)", "price": 130, "description_en": "Cherry cola mojito.", "description_ar": "موهيتو شيري كولا." }
+      ]
+    },
+    {
+      "category_en": "Smoothie", "category_ar": "سموثي",
+      "items": [
+        { "name_en": "Smoothie (Mango, Berry, Watermelon, Lemon Mint, Prickly Pear)", "name_ar": "سموثي (مانجو - بيري - بطيخ - ليمون بالنعناع - تين شوكي)", "price": 75, "description_en": "Thick fruit smoothie.", "description_ar": "سموثي فواكه سميك." },
+        { "name_en": "Smoothie (Mango Passion, Mango Peach, Mango Pineapple, Strawberry Passion, Kiwi)", "name_ar": "سموثي (مانجو باشن - مانجو خوخ - مانجو أناناس - فراولة باشن - كيوي)", "price": 85, "description_en": "Tropical fruit smoothie.", "description_ar": "سموثي فواكه استوائي." }
+      ]
+    },
+    {
+      "category_en": "VAYA Tonic", "category_ar": "فايا تونيك",
+      "items": [
+        { "name_en": "VAYA Tonic (New)", "name_ar": "فايا تونيك (جديد)", "price": 99, "description_en": "Signature tonic water drink.", "description_ar": "مشروب ماء التونيك الخاص." }
+      ]
+    },
+    {
+      "category_en": "Ice Cream", "category_ar": "آيس كريم",
+      "items": [
+        { "name_en": "Ice Cream - 2 Scoops", "name_ar": "ايس كريم 2 بولة", "price": 40, "description_en": "Two scoops of ice cream.", "description_ar": "كرتان من الآيس كريم." },
+        { "name_en": "Ice Cream - 3 Scoops", "name_ar": "ايس كريم 3 بولة", "price": 50, "description_en": "Three scoops of ice cream.", "description_ar": "ثلاث كرات من الآيس كريم." },
+        { "name_en": "Ice Cream - 4 Scoops", "name_ar": "ايس كريم 4 بولة", "price": 70, "description_en": "Four scoops of ice cream.", "description_ar": "أربع كرات من الآيس كريم." }
+      ]
+    },
+    {
+      "category_en": "Waffle & Pancake", "category_ar": "وافل وبانكيك",
+      "items": [
+        { "name_en": "Waffle with Nutella, White Chocolate, or Lotus", "name_ar": "وافل (نوتيلا - وايت شيكولات - لوتس)", "price": 80, "description_en": "Waffle with sweet spread.", "description_ar": "وافل مع صوص حلو." },
+        { "name_en": "Waffle with Pistachio, Hazelnut, or Caramel", "name_ar": "وافل (بستاشيو - بندق - كراميل)", "price": 90, "description_en": "Waffle with premium spread.", "description_ar": "وافل مع صوص فاخر." },
+        { "name_en": "Pancake (6 pieces) with Nutella, White Chocolate, or Lotus", "name_ar": "بانكيك (6 قطع) (نوتيلا - وايت شيكولات - لوتس)", "price": 55, "description_en": "6 mini pancakes.", "description_ar": "6 قطع بانكيك." },
+        { "name_en": "Pancake (6 pieces) with Pistachio, Hazelnut, or Caramel", "name_ar": "بانكيك (6 قطع) (بستاشيو - بندق - كراميل)", "price": 65, "description_en": "6 mini pancakes premium.", "description_ar": "6 قطع بانكيك فاخر." },
+        { "name_en": "Pancake (12 pieces) with Nutella, White Chocolate, or Lotus", "name_ar": "بانكيك (12 قطعة) (نوتيلا - وايت شيكولات - لوتس)", "price": 75, "description_en": "12 mini pancakes.", "description_ar": "12 قطعة بانكيك." },
+        { "name_en": "Pancake (12 pieces) with Pistachio, Hazelnut, or Caramel", "name_ar": "بانكيك (12 قطعة) (بستاشيو - بندق - كراميل)", "price": 85, "description_en": "12 mini pancakes premium.", "description_ar": "12 قطعة بانكيك فاخر." }
+      ]
+    },
+    {
+      "category_en": "Desserts", "category_ar": "حلويات",
+      "items": [
+        { "name_en": "Tiramisu", "name_ar": "تيراميسو", "price": 90, "description_en": "Classic Italian dessert.", "description_ar": "حلوى إيطالية كلاسيكية." },
+        { "name_en": "Carrot Cake (New)", "name_ar": "كاروت كيك (جديد)", "price": 90, "description_en": "Spiced carrot cake.", "description_ar": "كيك الجزر المتبل." },
+        { "name_en": "Molten Cake", "name_ar": "مولتن كيك", "price": 110, "description_en": "Warm chocolate cake.", "description_ar": "كيك شوكولاتة دافئ." },
+        { "name_en": "Molten Cake with Ice Cream", "name_ar": "مولتن كيك ايس كريم", "price": 135, "description_en": "Molten cake with ice cream.", "description_ar": "مولتن كيك مع آيس كريم." },
+        { "name_en": "Nutella Cheesecake", "name_ar": "تشيز كيك نوتيلا", "price": 80, "description_en": "Cheesecake with Nutella.", "description_ar": "تشيز كيك بالنوتيلا." },
+        { "name_en": "Lotus Cheesecake", "name_ar": "تشيز كيك لوتس", "price": 80, "description_en": "Cheesecake with Lotus.", "description_ar": "تشيز كيك باللوتس." },
+        { "name_en": "Cheesecake (Berry, Caramel, Pistachio, Red Berry, Mix Berry, Strawberry)", "name_ar": "تشيز كيك (بيري - كراميل - بستاشيو - توت أحمر - ميكس بيري - فراولة)", "price": 90, "description_en": "Classic cheesecake.", "description_ar": "تشيز كيك كلاسيك." }
+      ]
+    },
+    {
+      "category_en": "Add-On", "category_ar": "الإضافات",
+      "items": [
+        { "name_en": "Espresso Shot", "name_ar": "اسبريسو شوت", "price": 40, "description_en": "Extra espresso shot.", "description_ar": "جرعة إسبريسو إضافية." },
+        { "name_en": "Flavor", "name_ar": "نكهة سيرب", "price": 30, "description_en": "Flavor syrup.", "description_ar": "سيرب نكهة." },
+        { "name_en": "Sauce", "name_ar": "صوص إضافي", "price": 30, "description_en": "Extra sauce.", "description_ar": "صوص إضافي." },
+        { "name_en": "Pistachio", "name_ar": "بستاشيو", "price": 40, "description_en": "Pistachio spread.", "description_ar": "صوص فستق." },
+        { "name_en": "Condensed Milk", "name_ar": "حليب مكثف", "price": 30, "description_en": "Condensed milk.", "description_ar": "حليب مكثف." },
+        { "name_en": "Whipped Cream", "name_ar": "كريمة مخفوقة", "price": 30, "description_en": "Whipped cream.", "description_ar": "كريمة مخفوقة." },
+        { "name_en": "Frappe Powder", "name_ar": "بودرة فرابيه", "price": 35, "description_en": "Frappe powder.", "description_ar": "بودرة فرابيه." },
+        { "name_en": "Nuts", "name_ar": "مكسرات", "price": 25, "description_en": "Nut topping.", "description_ar": "مكسرات." },
+        { "name_en": "Honey", "name_ar": "عسل", "price": 20, "description_en": "Natural honey.", "description_ar": "عسل طبيعي." },
+        { "name_en": "Boba", "name_ar": "بوبا", "price": 30, "description_en": "Boba pearls.", "description_ar": "حبوب بوبا." }
+      ]
+    },
+    {
+      "category_en": "Bakery", "category_ar": "مخبوزات",
+      "items": [
+        { "name_en": "Croissant", "name_ar": "كرواسون", "price": 55, "description_en": "Butter croissant.", "description_ar": "كرواسون بالزبدة." },
+        { "name_en": "Cheddar Cheese Croissant", "name_ar": "كرواسون بالجبنة الشيدر", "price": 85, "description_en": "Croissant with cheddar.", "description_ar": "كرواسون بالشيدر." },
+        { "name_en": "Mixed Cheese Croissant", "name_ar": "كرواسون مكس جبن", "price": 90, "description_en": "Croissant with mixed cheese.", "description_ar": "كرواسون بجبن مشكل." },
+        { "name_en": "Smoked Turkey Croissant", "name_ar": "كرواسون تركي المدخن", "price": 95, "description_en": "Croissant with smoked turkey.", "description_ar": "كرواسون بالتركي المدخن." },
+        { "name_en": "Beef Croissant", "name_ar": "كرواسون بيف", "price": 85, "description_en": "Croissant with beef.", "description_ar": "كرواسون باللحم." }
+      ]
+    }
+  ]
+};
 
     // Flatten the nested JSON into a single array for easy filtering
     let flatMenu = [];
