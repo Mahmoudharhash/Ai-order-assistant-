@@ -104,12 +104,15 @@
             border: 4px solid var(--brand-cream); box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin-top: -9px;
         }
 
-        select {
-            width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #eee;
-            background-color: var(--brand-cream); font-family: inherit; font-size: 0.85rem;
-            color: var(--brand-dark); font-weight: 500; outline: none;
+        /* Mood Pills */
+        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pill-checkbox { display: none; }
+        .pill-label {
+            padding: 8px 16px; border-radius: 20px; border: 1px solid #E0E0E0;
+            font-size: 0.75rem; font-weight: 500; color: var(--brand-gray); cursor: pointer;
+            transition: all 0.2s ease; background-color: white;
         }
-        html[dir="rtl"] select { background-image: none; padding-left: 16px; }
+        .pill-checkbox:checked + .pill-label { background-color: var(--brand-dark); color: white; border-color: var(--brand-dark); }
 
         /* Results */
         .results-container { padding: 0 20px; }
@@ -241,15 +244,17 @@
                 <input type="range" id="budget-slider" min="20" max="150" value="150" step="5">
             </div>
 
+            <!-- Mood Pills (Multi-select) -->
             <div class="filter-group">
                 <label id="lbl-mood">What are you in the mood for?</label>
-                <select id="temp-select">
-                    <option value="all" id="opt-all">Everything</option>
-                    <option value="cold" id="opt-cold">Something Cold / Iced 🧊</option>
-                    <option value="hot" id="opt-hot">Something Hot ☕</option>
-                    <option value="sweet" id="opt-sweet">Sweet & Desserts 🍰</option>
-                    <option value="fruity" id="opt-fruity">Fruity & Refreshing 🍹</option>
-                </select>
+                <div class="pills-container">
+                    <label><input type="checkbox" value="Cold" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Cold 🧊" data-ar="بارد 🧊">Cold 🧊</span></label>
+                    <label><input type="checkbox" value="Hot" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Hot ☕" data-ar="ساخن ☕">Hot ☕</span></label>
+                    <label><input type="checkbox" value="Sweet" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Sweet 🍰" data-ar="حلو 🍰">Sweet 🍰</span></label>
+                    <label><input type="checkbox" value="Fruity" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Fruity 🍹" data-ar="فواكه 🍹">Fruity 🍹</span></label>
+                    <label><input type="checkbox" value="Coffee" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Coffee ☕" data-ar="قهوة ☕">Coffee ☕</span></label>
+                    <label><input type="checkbox" value="Creamy" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Creamy 🥛" data-ar="كريمي 🥛">Creamy 🥛</span></label>
+                </div>
             </div>
 
             <div class="filter-group">
@@ -531,14 +536,17 @@
             cat.items.forEach(item => {
                 // Auto-generate tags based on name/description to make filters work
                 let tags = [];
-                let searchString = (item.name_en + " " + item.description_en).toLowerCase();
+                let searchString = (item.name_en + " " + item.description_en + " " + cat.category_en).toLowerCase();
                 
-                if (searchString.includes('iced') || searchString.includes('cold') || searchString.includes('frappe') || searchString.includes('mojito') || searchString.includes('smoothie')) tags.push('Cold');
+                if (searchString.includes('iced') || searchString.includes('cold') || searchString.includes('frappe') || searchString.includes('mojito') || searchString.includes('smoothie') || searchString.includes('ice cream')) tags.push('Cold');
                 if (searchString.includes('hot') || cat.category_en.includes('Hot')) tags.push('Hot');
-                if (searchString.includes('sweet') || searchString.includes('caramel') || searchString.includes('nutella') || searchString.includes('chocolate') || searchString.includes('lotus') || cat.category_en.includes('Dessert') || cat.category_en.includes('Waffle') || cat.category_en.includes('Ice Cream')) tags.push('Sweet');
-                if (searchString.includes('juice') || searchString.includes('fruit') || searchString.includes('berry') || searchString.includes('mango') || cat.category_en.includes('Refresher')) tags.push('Fruity');
-                if (searchString.includes('vegan') || searchString.includes('black')) tags.push('Vegan');
-                if (searchString.includes('milk') || searchString.includes('latte') || searchString.includes('creamy')) tags.push('Creamy');
+                if (searchString.includes('sweet') || searchString.includes('caramel') || searchString.includes('nutella') || searchString.includes('chocolate') || searchString.includes('lotus') || cat.category_en.includes('Dessert') || cat.category_en.includes('Waffle') || cat.category_en.includes('Ice Cream') || cat.category_en.includes('Milkshake')) tags.push('Sweet');
+                if (searchString.includes('juice') || searchString.includes('fruit') || searchString.includes('berry') || searchString.includes('mango') || cat.category_en.includes('Refresher') || cat.category_en.includes('Cocktail') || cat.category_en.includes('Smoothie')) tags.push('Fruity');
+                if (searchString.includes('coffee') || searchString.includes('espresso') || searchString.includes('latte') || searchString.includes('mocha') || searchString.includes('cappuccino') || searchString.includes('macchiato') || cat.category_en.includes('Coffee')) tags.push('Coffee');
+                if (searchString.includes('milk') || searchString.includes('latte') || searchString.includes('creamy') || searchString.includes('shake')) tags.push('Creamy');
+
+                // Remove duplicates
+                tags = [...new Set(tags)];
 
                 flatMenu.push({
                     id: "item_" + Math.random().toString(36).substr(2, 9),
@@ -550,21 +558,74 @@
                     category_en: cat.category_en,
                     category_ar: cat.category_ar,
                     tags: tags,
-                    // Placeholder images based on category
-                    image: getCategoryImage(cat.category_en)
+                    image: getItemImage(item.name_en, cat.category_en)
                 });
             });
         });
     }
 
-    function getCategoryImage(category) {
-        const cat = category.toLowerCase();
-        if (cat.includes('espresso') || cat.includes('hot')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=600&q=80';
-        if (cat.includes('cold') || cat.includes('iced')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80';
-        if (cat.includes('bakery') || cat.includes('croissant')) return 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80';
-        if (cat.includes('dessert') || cat.includes('cake')) return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
-        if (cat.includes('juice') || cat.includes('smoothie') || cat.includes('mojito')) return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80';
-        return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80'; // Default cafe
+    // 🖼️ VALIDATED IMAGE MAPPING ENGINE
+    function getItemImage(name, category) {
+        const n = name.toLowerCase();
+        const c = category.toLowerCase();
+        
+        // Specific items matching
+        if (n.includes('espresso') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('turkish')) return 'https://images.unsplash.com/photo-1595144479298-8b0809929c0a?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cappuccino') || n.includes('flat white') || n.includes('cortado')) return 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('latte') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('mocha') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('hot chocolate') || n.includes('sahlab')) return 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('tea') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80';
+        
+        // Iced & Cold
+        if (n.includes('iced') || n.includes('ice ') || n.includes('cold')) {
+            if (n.includes('matcha')) return 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80';
+            if (n.includes('spanish')) return 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?auto=format&fit=crop&w=600&q=80';
+            if (n.includes('americano')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80';
+            return 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80'; // Generic iced coffee
+        }
+        
+        // Matcha
+        if (n.includes('matcha')) return 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80';
+        
+        // Boba
+        if (n.includes('boba')) return 'https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=600&q=80';
+        
+        // Frappe / Frappuccino
+        if (n.includes('frappe') || n.includes('frappuccino')) return 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80';
+        
+        // Milkshake
+        if (n.includes('milkshake')) return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80';
+        
+        // Cocktail, Mojito, Smoothie
+        if (n.includes('mojito') || n.includes('cocktail')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('smoothie')) return 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80';
+        
+        // Juices
+        if (n.includes('juice') || n.includes('lemonade') || n.includes('prickly pear')) return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('mango')) return 'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('strawberry')) return 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80';
+        
+        // Desserts & Bakery
+        if (n.includes('ice cream') || n.includes('affogato')) return 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('waffle')) return 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('pancake')) return 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cheesecake')) return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('tiramisu')) return 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cake') || n.includes('brownie')) return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('croissant')) return 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cookie')) return 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('turkey') || n.includes('beef') || n.includes('cheese')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80';
+
+        // Generic Fallbacks based on category
+        if (c.includes('hot')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('cold') || c.includes('iced')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('bakery')) return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('dessert')) return 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('coffee')) return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80';
+        
+        return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80'; // Ultimate default
     }
 
     // ==========================================
@@ -575,14 +636,16 @@
 
     const translations = {
         en: {
-            budget: "Max Budget", mood: "What are you in the mood for?", all: "Everything", cold: "Something Cold / Iced 🧊", hot: "Something Hot ☕", sweet: "Sweet & Desserts 🍰", fruity: "Fruity & Refreshing 🍹",
-            viewMenu: "📖 View Full Menu Image", recommended: "Recommended for you", viewDetails: "View Details", addList: "❤️ Add to My List", added: "✓ Added to List!",
-            myList: "My List", total: "Total:", emptyCart: "Your list is empty. Add some items!", close: "Close", fullMenu: "Full Menu", noResults: "No items match your filters."
+            budget: "Max Budget", mood: "What are you in the mood for?", viewMenu: "📖 View Full Menu Image", 
+            recommended: "Recommended for you", viewDetails: "View Details", addList: "❤️ Add to My List", 
+            added: "✓ Added to List!", myList: "My List", total: "Total:", emptyCart: "Your list is empty. Add some items!", 
+            close: "Close", fullMenu: "Full Menu", noResults: "No items match your filters."
         },
         ar: {
-            budget: "أقصى ميزانية", mood: "ما هو مزاجك الآن؟", all: "كل شيء", cold: "مشروب بارد 🧊", hot: "مشروب ساخن ☕", sweet: "حلويات 🍰", fruity: "فواكه ومنعش 🍹",
-            viewMenu: "📖 عرض صورة المنيو كاملة", recommended: "مقترح لك", viewDetails: "عرض التفاصيل", addList: "❤️ أضف إلى قائمتي", added: "✓ تمت الإضافة!",
-            myList: "قائمتي", total: "الإجمالي:", emptyCart: "قائمتك فارغة. أضف بعض العناصر!", close: "إغلاق", fullMenu: "المنيو كاملة", noResults: "لا توجد عناصر تطابق بحثك."
+            budget: "أقصى ميزانية", mood: "ما هو مزاجك الآن؟", viewMenu: "📖 عرض صورة المنيو كاملة", 
+            recommended: "مقترح لك", viewDetails: "عرض التفاصيل", addList: "❤️ أضف إلى قائمتي", 
+            added: "✓ تمت الإضافة!", myList: "قائمتي", total: "الإجمالي:", emptyCart: "قائمتك فارغة. أضف بعض العناصر!", 
+            close: "إغلاق", fullMenu: "المنيو كاملة", noResults: "لا توجد عناصر تطابق بحثك."
         }
     };
 
@@ -591,7 +654,6 @@
     // ==========================================
     const budgetSlider = document.getElementById('budget-slider');
     const budgetDisplay = document.getElementById('budget-display');
-    const tempSelect = document.getElementById('temp-select');
     const menuContainer = document.getElementById('menu-items');
     const linaMessage = document.getElementById('lina-message');
     const modal = document.getElementById('detail-modal');
@@ -611,17 +673,18 @@
         const t = translations[currentLang];
         document.getElementById('lbl-budget').innerText = t.budget;
         document.getElementById('lbl-mood').innerText = t.mood;
-        document.getElementById('opt-all').innerText = t.all;
-        document.getElementById('opt-cold').innerText = t.cold;
-        document.getElementById('opt-hot').innerText = t.hot;
-        document.getElementById('opt-sweet').innerText = t.sweet;
-        document.getElementById('opt-fruity').innerText = t.fruity;
         document.getElementById('btn-full-menu').innerText = t.viewMenu;
         document.getElementById('results-title').innerText = t.recommended;
         document.getElementById('cart-title').innerText = t.myList;
         document.getElementById('lbl-total').innerText = t.total;
         document.getElementById('btn-close-cart').innerText = t.close;
         document.getElementById('full-menu-title').innerText = t.fullMenu;
+
+        // Update Mood Pills text
+        document.querySelectorAll('.mood-pill').forEach(checkbox => {
+            const label = checkbox.nextElementSibling;
+            label.innerText = currentLang === 'en' ? label.getAttribute('data-en') : label.getAttribute('data-ar');
+        });
 
         filterMenu(); // Re-render menu
         renderCart(); // Re-render cart
@@ -689,17 +752,17 @@
     // ==========================================
     function filterMenu() {
         const maxBudget = parseInt(budgetSlider.value);
-        const moodFilter = tempSelect.value;
+        const selectedMoods = Array.from(document.querySelectorAll('.mood-pill:checked')).map(cb => cb.value);
         budgetDisplay.textContent = `${maxBudget} EGP`;
 
         const filteredItems = flatMenu.filter(item => {
             // Budget Check
             if (item.price > maxBudget) return false;
 
-            // Mood Check (Tags)
-            if (moodFilter !== 'all') {
-                const hasTag = item.tags.some(tag => tag.toLowerCase() === moodFilter);
-                if (!hasTag) return false;
+            // Mood Check (Tags) - Must match ALL selected moods
+            if (selectedMoods.length > 0) {
+                const hasAllMoods = selectedMoods.every(mood => item.tags.includes(mood));
+                if (!hasAllMoods) return false;
             }
             return true;
         });
@@ -841,7 +904,10 @@
 
     // Event Listeners
     budgetSlider.addEventListener('input', filterMenu);
-    tempSelect.addEventListener('change', filterMenu);
+    // Listen for changes on any mood pill
+    document.querySelectorAll('.mood-pill').forEach(cb => {
+        cb.addEventListener('change', filterMenu);
+    });
 
     // Initial Render
     filterMenu();
