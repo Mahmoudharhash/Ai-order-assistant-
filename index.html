@@ -1,227 +1,916 @@
-
-/**
- * Vaya Cafe — Product-aware image engine
- *
- * Maps products to relevant image subjects instead of using
- * a generic coffee image as the fallback for everything.
- *
- * No changes to your menu JSON are required.
- */
-
-function getItemImage(name, category) {
-    const n = name.toLowerCase();
-    const c = category.toLowerCase();
-
-    // A stable identifier for each product
-    function makeLock(value) {
-        let hash = 0;
-        for (let i = 0; i < value.length; i++) {
-            hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaya Cafe | Smart Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-dark: #1A3B32;
+            --brand-cream: #FDFBF7;
+            --brand-orange: #EAA64D;
+            --brand-text: #333333;
+            --brand-gray: #777777;
+            --brand-green-light: #E8F0EC;
         }
-        return Math.abs(hash);
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f4f4;
+            color: var(--brand-text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            transition: direction 0.3s;
+        }
+        /* RTL Support */
+        html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        html[dir="rtl"] .lina-bubble { border-radius: 18px; border-top-right-radius: 4px; border-top-left-radius: 18px; }
+        html[dir="rtl"] .item-price { margin-left: 0; margin-right: 10px; }
+        html[dir="rtl"] .lina-bubble::before { display: none; }
+
+        .app-container {
+            width: 100%; max-width: 480px; background-color: var(--brand-cream);
+            min-height: 100vh; box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            position: relative; padding-bottom: 40px; overflow-x: hidden;
+        }
+        /* Header */
+        header {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--brand-cream); border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-logo { text-align: center; flex-grow: 1; }
+        .header-logo h1 {
+            font-family: 'Playfair Display', serif; font-size: 1.5rem;
+            color: var(--brand-dark); margin-bottom: 2px; letter-spacing: 0.5px;
+        }
+        .header-logo p { font-size: 0.6rem; letter-spacing: 2px; color: var(--brand-gray); text-transform: uppercase; }
+        
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .icon-btn {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer;
+            color: var(--brand-dark); position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        .lang-btn { font-size: 0.8rem; font-weight: 700; border: 1px solid var(--brand-dark); padding: 4px 8px; border-radius: 8px; }
+        .cart-badge {
+            position: absolute; top: -5px; right: -8px; background-color: var(--brand-orange);
+            color: white; font-size: 0.6rem; font-weight: bold; width: 16px; height: 16px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Lina Assistant */
+        .lina-section { display: flex; align-items: flex-start; padding: 20px; gap: 15px; }
+        .lina-avatar-container { position: relative; flex-shrink: 0; }
+        .lina-avatar {
+            width: 65px; height: 65px; border-radius: 50%; background-color: var(--brand-orange);
+            border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .lina-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .online-dot {
+            position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px;
+            background-color: #4CAF50; border: 2px solid white; border-radius: 50%;
+        }
+        .lina-bubble {
+            background-color: white; padding: 16px; border-radius: 18px; border-top-left-radius: 4px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.04); font-size: 0.85rem; line-height: 1.5;
+            color: var(--brand-dark); flex-grow: 1; position: relative;
+        }
+        .lina-name { font-weight: 600; font-size: 0.8rem; color: var(--brand-orange); margin-bottom: 5px; display: block; }
+
+        /* Filters */
+        .filters-container { padding: 0 20px; margin-bottom: 20px; }
+        .filter-card {
+            background-color: white; border-radius: 20px; padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); margin-bottom: 15px;
+        }
+        .filter-group { margin-bottom: 20px; }
+        .filter-group:last-child { margin-bottom: 0; }
+        .filter-group label {
+            font-weight: 600; font-size: 0.8rem; display: flex; justify-content: space-between;
+            margin-bottom: 12px; color: var(--brand-dark);
+        }
+        .budget-value { color: var(--brand-orange); font-size: 0.95rem; }
+        
+        input[type="range"] {
+            -webkit-appearance: none; width: 100%; height: 6px; background: #E8F0EC;
+            border-radius: 5px; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 24px; height: 24px;
+            border-radius: 50%; background: var(--brand-dark); cursor: pointer;
+            border: 4px solid var(--brand-cream); box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin-top: -9px;
+        }
+
+        /* Mood Pills */
+        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pill-checkbox { display: none; }
+        .pill-label {
+            padding: 8px 16px; border-radius: 20px; border: 1px solid #E0E0E0;
+            font-size: 0.75rem; font-weight: 500; color: var(--brand-gray); cursor: pointer;
+            transition: all 0.2s ease; background-color: white;
+        }
+        .pill-checkbox:checked + .pill-label { background-color: var(--brand-dark); color: white; border-color: var(--brand-dark); }
+
+        /* Results */
+        .results-container { padding: 0 20px; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .results-header h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--brand-dark); }
+        html[dir="rtl"] .results-header h2 { font-family: 'Cairo', sans-serif; font-weight: 700; }
+        
+        .item-card {
+            background-color: white; border-radius: 20px; overflow: hidden;
+            margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        }
+        .item-image { width: 100%; height: 160px; background-color: #f0f0f0; object-fit: cover; display: block; }
+        .item-content { padding: 18px; }
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .item-name { font-weight: 600; font-size: 1.1rem; color: var(--brand-dark); line-height: 1.3; }
+        .item-price { font-weight: 700; color: var(--brand-dark); font-size: 1.1rem; white-space: nowrap; }
+        .item-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .tag {
+            background-color: var(--brand-green-light); color: var(--brand-dark);
+            font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;
+        }
+        .item-desc {
+            font-size: 0.8rem; color: var(--brand-gray); line-height: 1.5; margin-bottom: 15px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .btn-view {
+            width: 100%; padding: 12px; background-color: white; color: var(--brand-dark);
+            border: 1px solid var(--brand-dark); border-radius: 12px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: background 0.2s; font-family: inherit;
+        }
+        .btn-view:hover { background-color: var(--brand-green-light); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center;
+            align-items: flex-end; z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: var(--brand-cream); width: 100%; max-width: 480px;
+            border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px;
+            transform: translateY(100%); transition: transform 0.3s ease;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-drag-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
+        .modal-image { width: 100%; height: 200px; object-fit: cover; border-radius: 20px; margin-bottom: 20px; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--brand-dark); margin-bottom: 8px; }
+        html[dir="rtl"] .modal-title { font-family: 'Cairo', sans-serif; }
+        .modal-price { font-size: 1.2rem; font-weight: 700; color: var(--brand-orange); margin-bottom: 15px; }
+        .modal-section-title { font-weight: 600; font-size: 0.85rem; color: var(--brand-dark); margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-desc { font-size: 0.9rem; color: var(--brand-gray); line-height: 1.6; }
+        
+        .btn-add {
+            width: 100%; padding: 16px; background-color: var(--brand-dark); color: white;
+            border: none; border-radius: 15px; font-weight: 600; font-size: 1rem;
+            cursor: pointer; margin-top: 25px; font-family: inherit; transition: background 0.2s;
+        }
+        .btn-add:active { background-color: #2a5548; }
+        .btn-add.added { background-color: var(--brand-orange); }
+
+        /* Cart Modal Specific */
+        .cart-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid #eee;
+        }
+        .cart-item-info { display: flex; flex-direction: column; gap: 5px; }
+        .cart-item-title { font-weight: 600; color: var(--brand-dark); font-size: 0.95rem; }
+        .cart-item-price { font-size: 0.85rem; color: var(--brand-gray); }
+        .cart-controls { display: flex; align-items: center; gap: 10px; }
+        .qty-btn {
+            width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--brand-dark);
+            background: white; color: var(--brand-dark); font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+        }
+        .cart-total {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 20px; font-size: 1.2rem; font-weight: 700; color: var(--brand-dark);
+            padding-top: 20px; border-top: 2px dashed #ddd;
+        }
+        .empty-cart { text-align: center; padding: 40px 0; color: var(--brand-gray); }
+        
+        .no-results { text-align: center; padding: 40px 20px; color: var(--brand-gray); background: white; border-radius: 20px; }
+        .no-results span { font-size: 2rem; display: block; margin-bottom: 10px; }
+
+        /* Full Menu Modal */
+        .full-menu-img { width: 100%; height: auto; border-radius: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <header>
+        <div style="width: 40px;"></div> <!-- Spacer -->
+        <div class="header-logo">
+            <h1>Vaya Cafe</h1>
+            <p>More than coffee</p>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn lang-btn" onclick="toggleLanguage()" id="lang-toggle">AR</button>
+            <button class="icon-btn" onclick="openCart()">
+                🛒<span class="cart-badge" id="cart-count">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Lina Assistant -->
+    <div class="lina-section">
+        <div class="lina-avatar-container">
+            <div class="lina-avatar">
+                <!-- ✅ Your Lina character image is now here! -->
+                <img src="https://raw.githubusercontent.com/Mahmoudharhash/Ai-order-assistant-/6fd83ca65a3b2b7b51c7451e8a53ea8bfbc7414d/IMG_20261012_225112.png" alt="Lina" id="lina-img">
+            </div>
+            <div class="online-dot"></div>
+        </div>
+        <div class="lina-bubble">
+            <span class="lina-name" id="lina-name">Lina</span>
+            <div id="lina-message">Hi! I'm Lina. Set your budget and preferences below, and I'll find the perfect order for you!</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-container">
+        <div class="filter-card">
+            <div class="filter-group">
+                <label><span id="lbl-budget">Max Budget</span> <span class="budget-value" id="budget-display">150 EGP</span></label>
+                <input type="range" id="budget-slider" min="20" max="150" value="150" step="5">
+            </div>
+
+            <!-- Mood Pills (Multi-select) -->
+            <div class="filter-group">
+                <label id="lbl-mood">What are you in the mood for?</label>
+                <div class="pills-container">
+                    <label><input type="checkbox" value="Cold" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Cold 🧊" data-ar="بارد 🧊">Cold 🧊</span></label>
+                    <label><input type="checkbox" value="Hot" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Hot ☕" data-ar="ساخن ☕">Hot ☕</span></label>
+                    <label><input type="checkbox" value="Sweet" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Sweet 🍰" data-ar="حلو 🍰">Sweet 🍰</span></label>
+                    <label><input type="checkbox" value="Fruity" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Fruity 🍹" data-ar="فواكه 🍹">Fruity 🍹</span></label>
+                    <label><input type="checkbox" value="Coffee" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Coffee ☕" data-ar="قهوة ☕">Coffee ☕</span></label>
+                    <label><input type="checkbox" value="Creamy" class="pill-checkbox mood-pill"><span class="pill-label" data-en="Creamy 🥛" data-ar="كريمي 🥛">Creamy 🥛</span></label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <button class="btn-view" onclick="openFullMenu()" id="btn-full-menu" style="border-color: var(--brand-orange); color: var(--brand-orange);">
+                    📖 View Full Menu Image
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-container">
+        <div class="results-header">
+            <h2 id="results-title">Recommended for you</h2>
+        </div>
+        <div id="menu-items"></div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal-content" id="modal-content-body"></div>
+</div>
+
+<!-- Cart Modal -->
+<div class="modal-overlay" id="cart-modal">
+    <div class="modal-content">
+        <div class="modal-drag-handle"></div>
+        <h2 class="modal-title" id="cart-title">My List</h2>
+        <div id="cart-items-container"></div>
+        <div class="cart-total" id="cart-total-container" style="display: none;">
+            <span id="lbl-total">Total:</span>
+            <span id="cart-total-price">0 EGP</span>
+        </div>
+        <button class="btn-add" onclick="closeModal('cart-modal')" id="btn-close-cart" style="margin-top: 15px;">Close</button>
+    </div>
+</div>
+
+<!-- Full Menu Modal -->
+<div class="modal-overlay" id="full-menu-modal">
+    <div class="modal-content">
+        <div class="modal-drag-handle"></div>
+        <h2 class="modal-title" style="margin-bottom: 15px;" id="full-menu-title">Full Menu</h2>
+        <!-- ✅ Your Vaya Cafe Menu image is now here! -->
+        <img src="https://raw.githubusercontent.com/Mahmoudharhash/Ai-order-assistant-/6fd83ca65a3b2b7b51c7451e8a53ea8bfbc7414d/file_00000000a6dc8246865d43ea426f9daa.png" alt="Full Menu" class="full-menu-img" id="full-menu-img">
+        <button class="btn-add" onclick="closeModal('full-menu-modal')" style="margin-top: 20px;">Close</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. THE MENU DATA (Your provided JSON)
+    // ==========================================
+    const rawVayaData = {
+  "cafe_name": "Vaya Cafe",
+  "menu": [
+    {
+      "category_en": "Classics Coffee", "category_ar": "كلاسيك كوفي",
+      "items": [
+        { "name_en": "Single Espresso", "name_ar": "اسبريسو سنجل", "price": 50, "description_en": "Rich and bold single shot.", "description_ar": "جرعة مركزة وغنية." },
+        { "name_en": "Double Espresso", "name_ar": "اسبريسو دبل", "price": 60, "description_en": "Double shot of intense espresso.", "description_ar": "جرعة مضاعفة من الإسبريسو القوي." },
+        { "name_en": "Macchiato", "name_ar": "ماكياتو", "price": 75, "description_en": "Espresso with foamed milk.", "description_ar": "إسبريسو مع رغوة الحليب." },
+        { "name_en": "Cortado", "name_ar": "كورتادو", "price": 70, "description_en": "Espresso and warm milk.", "description_ar": "إسبريسو وحليب دافئ." },
+        { "name_en": "Flat White", "name_ar": "فلات وايت", "price": 80, "description_en": "Smooth espresso with microfoam.", "description_ar": "إسبريسو ناعم مع رغوة دقيقة." },
+        { "name_en": "Americano", "name_ar": "أمريكانو", "price": 65, "description_en": "Espresso diluted with hot water.", "description_ar": "إسبريسو مخفف بالماء الساخن." },
+        { "name_en": "Single Turkish Coffee", "name_ar": "قهوة تركي سنجل", "price": 35, "description_en": "Traditional Turkish coffee.", "description_ar": "قهوة تركية تقليدية." },
+        { "name_en": "Double Turkish Coffee", "name_ar": "قهوة تركي دبل", "price": 40, "description_en": "Double Turkish coffee.", "description_ar": "قهوة تركية دبل." },
+        { "name_en": "Farsawy Coffee", "name_ar": "قهوة فرساوي", "price": 50, "description_en": "Authentic local specialty coffee.", "description_ar": "قهوة فرساوي أصيلة." },
+        { "name_en": "Hazelnut Coffee", "name_ar": "قهوة بندق", "price": 55, "description_en": "Coffee with roasted hazelnut.", "description_ar": "قهوة بنكهة البندق." },
+        { "name_en": "Cappuccino", "name_ar": "كابتشينو", "price": 75, "description_en": "Espresso, milk, and foam.", "description_ar": "إسبريسو، حليب، ورغوة." },
+        { "name_en": "Latte", "name_ar": "لاتيه", "price": 80, "description_en": "Espresso with steamed milk.", "description_ar": "إسبريسو مع حليب مبخر." },
+        { "name_en": "Spanish Latte", "name_ar": "سبانيش لاتيه", "price": 90, "description_en": "Sweet latte with condensed milk.", "description_ar": "لاتيه حلو بالحليب المكثف." },
+        { "name_en": "Caramel Latte", "name_ar": "كراميل لاتيه", "price": 90, "description_en": "Latte with caramel syrup.", "description_ar": "لاتيه مع شراب الكراميل." },
+        { "name_en": "Nutella Latte", "name_ar": "نوتيلا لاتيه", "price": 90, "description_en": "Latte with Nutella.", "description_ar": "لاتيه مع نوتيلا." },
+        { "name_en": "Mocha Latte", "name_ar": "موكا لاتيه", "price": 90, "description_en": "Espresso, chocolate, and milk.", "description_ar": "إسبريسو، شوكولاتة، وحليب." },
+        { "name_en": "Salted Caramel", "name_ar": "كراميل مملح", "price": 90, "description_en": "Caramel latte with sea salt.", "description_ar": "لاتيه كراميل مع ملح البحر." },
+        { "name_en": "Lotus Latte", "name_ar": "لوتس لاتيه", "price": 75, "description_en": "Latte with Lotus Biscoff.", "description_ar": "لاتيه مع لوتس." },
+        { "name_en": "Nescafé", "name_ar": "نسكافيه", "price": 50, "description_en": "Classic instant coffee.", "description_ar": "نسكافيه كلاسيك." }
+      ]
+    },
+    {
+      "category_en": "Signature Drinks", "category_ar": "مشروبات مميزة",
+      "items": [
+        { "name_en": "Ice Coffee", "name_ar": "ايس كوفي", "price": 95, "description_en": "Chilled refreshing coffee.", "description_ar": "قهوة باردة ومنعشة." },
+        { "name_en": "Ice Mocha", "name_ar": "ايس موكا", "price": 95, "description_en": "Cold espresso, chocolate, and milk.", "description_ar": "إسبريسو بارد، شوكولاتة، وحليب." },
+        { "name_en": "Caramel Macchiato", "name_ar": "كراميل ميكاتو", "price": 95, "description_en": "Layered iced coffee with caramel.", "description_ar": "قهوة مثلجة طبقات مع كراميل." },
+        { "name_en": "Ice Latte", "name_ar": "ايس لاتيه", "price": 75, "description_en": "Cold milk and espresso.", "description_ar": "حليب بارد وإسبريسو." },
+        { "name_en": "Ice White Mocha", "name_ar": "ايس وايت موكا", "price": 85, "description_en": "White chocolate, espresso, and milk.", "description_ar": "شوكولاتة بيضاء، إسبريسو، وحليب." },
+        { "name_en": "Ice Salted Caramel", "name_ar": "ايس سولد ت كاراميل", "price": 90, "description_en": "Cold caramel coffee with salt.", "description_ar": "قهوة باردة بكراميل وملح." },
+        { "name_en": "Ice Spanish Latte", "name_ar": "ايس اسبانش لاتيه", "price": 80, "description_en": "Sweet iced latte with condensed milk.", "description_ar": "لاتيه مثلج حلو بحليب مكثف." },
+        { "name_en": "Ice Pistachio Latte", "name_ar": "ايس بيستاشيو لاتيه", "price": 90, "description_en": "Cold creamy espresso with pistachio.", "description_ar": "إسبريسو بارد كريمي مع فستق." },
+        { "name_en": "Ice Americano", "name_ar": "ايس امريكانو", "price": 60, "description_en": "Espresso over cold water and ice.", "description_ar": "إسبريسو فوق ماء بارد وثلج." },
+        { "name_en": "Affogato Coffee", "name_ar": "افجاتو كوفي", "price": 60, "description_en": "Vanilla ice cream with hot espresso.", "description_ar": "آيس كريم فانيليا مع إسبريسو ساخن." }
+      ]
+    },
+    {
+      "category_en": "Hot Drinks", "category_ar": "مشروبات ساخنة",
+      "items": [
+        { "name_en": "Tea", "name_ar": "شاي", "price": 20, "description_en": "Classic hot black tea.", "description_ar": "شاي أسود ساخن." },
+        { "name_en": "Green Tea", "name_ar": "شاي أخضر", "price": 30, "description_en": "Hot green tea.", "description_ar": "شاي أخضر ساخن." },
+        { "name_en": "Tea with Milk", "name_ar": "شاي بالحليب", "price": 35, "description_en": "Black tea with milk.", "description_ar": "شاي أسود بالحليب." },
+        { "name_en": "Herbs", "name_ar": "الأعشاب", "price": 30, "description_en": "Hot herbal infusion.", "description_ar": "أعشاب ساخنة." },
+        { "name_en": "Hot Cider", "name_ar": "هوت سايدر", "price": 40, "description_en": "Warm spiced apple cider.", "description_ar": "عصير تفاح ساخن ومتبل." },
+        { "name_en": "Cinnamon Milk", "name_ar": "قرفة حليب", "price": 50, "description_en": "Milk with cinnamon.", "description_ar": "حليب بالقرفة." },
+        { "name_en": "Fruit Tea", "name_ar": "شاي فواكه", "price": 30, "description_en": "Hot fruit tea.", "description_ar": "شاي فواكه ساخن." },
+        { "name_en": "Sahlab", "name_ar": "سحلب", "price": 60, "description_en": "Traditional hot sahlab.", "description_ar": "سحلب ساخن تقليدي." },
+        { "name_en": "Sahlab with Nuts", "name_ar": "سحلب مكسرات", "price": 70, "description_en": "Sahlab with mixed nuts.", "description_ar": "سحلب مع مكسرات." },
+        { "name_en": "Hot Chocolate", "name_ar": "هوت شوكلت", "price": 55, "description_en": "Creamy hot chocolate.", "description_ar": "شوكولاتة ساخنة كريمية." },
+        { "name_en": "Hot Marshmallow", "name_ar": "هوت مارشميلو", "price": 65, "description_en": "Hot chocolate with marshmallows.", "description_ar": "شوكولاتة ساخنة مع مارشميلو." },
+        { "name_en": "Hot Espresso", "name_ar": "هوت اسبريسو", "price": 70, "description_en": "Hot espresso.", "description_ar": "إسبريسو ساخن." },
+        { "name_en": "Hot Chocolate with Nuts", "name_ar": "هوت شوكلت مكسرات", "price": 80, "description_en": "Hot chocolate with nuts.", "description_ar": "شوكولاتة ساخنة مع مكسرات." }
+      ]
+    },
+    {
+      "category_en": "Milkshake", "category_ar": "ميلك شيك",
+      "items": [
+        { "name_en": "Milkshake (Caramel, Mango, Strawberry, Mocha, Oreo)", "name_ar": "ميلك شيك (كراميل - مانجو - فراولة - موكا - أوريو)", "price": 95, "description_en": "Thick creamy milkshake.", "description_ar": "ميلك شيك سميك وكريمي." },
+        { "name_en": "Milkshake (Kinder, Nescafé)", "name_ar": "ميلك شيك (كيندر - نسكافيه)", "price": 100, "description_en": "Milkshake with Kinder or Nescafé.", "description_ar": "ميلك شيك بنكهة كيندر أو نسكافيه." },
+        { "name_en": "Milkshake (Vanilla, Blueberry, Caramel Nuts, Popcorn, Snickers, Pistachio)", "name_ar": "ميلك شيك (فانيليا - بلوبيري - كراميل مكسرات - فشار - سنيكرز - فستق)", "price": 110, "description_en": "Deluxe milkshake with premium flavors.", "description_ar": "ميلك شيك فاخر بنكهات مميزة." }
+      ]
+    },
+    {
+      "category_en": "Cocktail", "category_ar": "كوكتيل",
+      "items": [
+        { "name_en": "Vaya Cocktail", "name_ar": "فايا", "price": 90, "description_en": "Vaya special fruit cocktail.", "description_ar": "كوكتيل فواكه فايا الخاص." },
+        { "name_en": "Velvet Green", "name_ar": "فيلفيد جرين", "price": 90, "description_en": "Green fruit cocktail.", "description_ar": "كوكتيل فواكه أخضر." },
+        { "name_en": "Pink Monkey", "name_ar": "بنك مانكي", "price": 90, "description_en": "Pink fruity cocktail.", "description_ar": "كوكتيل وردي فواكهي." },
+        { "name_en": "Pina Colada", "name_ar": "بينا كولادا", "price": 90, "description_en": "Coconut and pineapple.", "description_ar": "جوز الهند والأناناس." },
+        { "name_en": "Mango & Passion Fruit", "name_ar": "مانجو وباشن فروت", "price": 90, "description_en": "Mango and passion fruit.", "description_ar": "مانجو وباشن فروت." },
+        { "name_en": "Mango & Peach", "name_ar": "مانجو وخوخ", "price": 90, "description_en": "Mango and peach.", "description_ar": "مانجو وخوخ." },
+        { "name_en": "Mango & Pineapple", "name_ar": "مانجو وأناناس", "price": 90, "description_en": "Mango and pineapple.", "description_ar": "مانجو وأناناس." },
+        { "name_en": "Triple Vibe (New)", "name_ar": "تريبل فايب (جديد)", "price": 100, "description_en": "Mango, strawberry, banana milk.", "description_ar": "مانجو، فراولة، حليب موز." }
+      ]
+    },
+    {
+      "category_en": "Coffee Blended", "category_ar": "كوفي بلندد",
+      "items": [
+        { "name_en": "Spanish Frappuccino", "name_ar": "فرابتشينو اسبانش", "price": 85, "description_en": "Blended Spanish latte.", "description_ar": "سبانيش لاتيه مخفوق." },
+        { "name_en": "Caramel Frappuccino", "name_ar": "فرابتشينو كراميل", "price": 85, "description_en": "Blended caramel coffee.", "description_ar": "قهوة كراميل مخفوقة." },
+        { "name_en": "Mocha Frappuccino", "name_ar": "فرابتشينو موكا", "price": 85, "description_en": "Blended mocha coffee.", "description_ar": "قهوة موكا مخفوقة." },
+        { "name_en": "White Mocha Frappuccino", "name_ar": "فرابتشينو وايت موكا", "price": 85, "description_en": "Blended white mocha.", "description_ar": "وايت موكا مخفوقة." },
+        { "name_en": "Salted Caramel Frappuccino", "name_ar": "فرابتشينو سولتت كراميل", "price": 85, "description_en": "Blended salted caramel.", "description_ar": "كراميل مملح مخفوق." }
+      ]
+    },
+    {
+      "category_en": "Non-Coffee Blended", "category_ar": "نون كوفي بلندد",
+      "items": [
+        { "name_en": "Caramel Frappé", "name_ar": "فرابيه كراميل", "price": 75, "description_en": "Creamy caramel ice blend.", "description_ar": "كراميل مثلج كريمي." },
+        { "name_en": "Strawberry Frappé", "name_ar": "فرابيه الفراولة", "price": 85, "description_en": "Strawberry ice blend.", "description_ar": "فراولة مثلجة مخفوقة." },
+        { "name_en": "Mixed Berry Frappé", "name_ar": "فرابيه مكس بيري", "price": 85, "description_en": "Mixed berry ice blend.", "description_ar": "توت مشكل مثلج مخفوق." },
+        { "name_en": "Vanilla Frappé", "name_ar": "فرابيه الفانيليا", "price": 75, "description_en": "Vanilla ice blend.", "description_ar": "فانيليا مثلجة مخفوقة." },
+        { "name_en": "Coconut Frappé", "name_ar": "فرابيه جوز الهند", "price": 75, "description_en": "Coconut ice blend.", "description_ar": "جوز الهند مثلج مخفوق." },
+        { "name_en": "Mocha Frappé", "name_ar": "فرابيه موكا", "price": 75, "description_en": "Chocolate mocha ice blend.", "description_ar": "موكا شوكولاتة مثلجة." },
+        { "name_en": "Berry Frappé", "name_ar": "فرابيه بيري", "price": 85, "description_en": "Berry ice blend.", "description_ar": "بيري مثلج مخفوق." }
+      ]
+    },
+    {
+      "category_en": "Matcha", "category_ar": "ماتشا",
+      "items": [
+        { "name_en": "Iced Matcha Latte", "name_ar": "ايس ماتشا لاتيه", "price": 110, "description_en": "Matcha with milk and ice.", "description_ar": "ماتشا مع حليب وثلج." },
+        { "name_en": "Iced Spanish Matcha", "name_ar": "ايس اسبانش ماتشا", "price": 125, "description_en": "Matcha with condensed milk.", "description_ar": "ماتشا مع حليب مكثف." },
+        { "name_en": "Iced Blueberry Matcha", "name_ar": "ايس ماتشا بلوبيري", "price": 140, "description_en": "Matcha with blueberry.", "description_ar": "ماتشا مع بلوبيري." },
+        { "name_en": "Iced Strawberry Matcha", "name_ar": "ايس ماتشا فراولة", "price": 125, "description_en": "Matcha with strawberry.", "description_ar": "ماتشا مع فراولة." },
+        { "name_en": "Iced Cherry Matcha", "name_ar": "ايس ماتشا شيري", "price": 140, "description_en": "Matcha with cherry.", "description_ar": "ماتشا مع كرز." },
+        { "name_en": "Iced Mango Matcha", "name_ar": "ايس ماتشا مانجو", "price": 140, "description_en": "Matcha with mango.", "description_ar": "ماتشا مع مانجو." },
+        { "name_en": "Iced Mixed Berry Matcha", "name_ar": "ايس ماتشا مكس بيري", "price": 140, "description_en": "Matcha with mixed berries.", "description_ar": "ماتشا مع توت مشكل." }
+      ]
+    },
+    {
+      "category_en": "Boba Iced Tea", "category_ar": "بوبا أيس تي",
+      "items": [
+        { "name_en": "Boba Iced Tea (Passion Fruit, Cola, Mango / Mix Berry, Strawberry, Red Berries / Berry, Peach, Tangerine, Cherry)", "name_ar": "بوبا أيس تي (باشن فروت - كولا - مانجو / ميكس بيري - فراولة - توت أحمر / بيري - خوخ - يوسفي - كرز)", "price": 100, "description_en": "Iced tea with boba pearls.", "description_ar": "شاي مثلج مع حبوب البوبا." }
+      ]
+    },
+    {
+      "category_en": "Non-Coffee Refreshers", "category_ar": "ريفرشمنتس (منعشات بدون قهوة)",
+      "items": [
+        { "name_en": "Mango Juice", "name_ar": "مانجا", "price": 65, "description_en": "Fresh mango juice.", "description_ar": "عصير مانجو طازج." },
+        { "name_en": "Strawberry Juice", "name_ar": "فراولة", "price": 65, "description_en": "Fresh strawberry juice.", "description_ar": "عصير فراولة طازج." },
+        { "name_en": "Guava Juice", "name_ar": "جوافة", "price": 60, "description_en": "Fresh guava juice.", "description_ar": "عصير جوافة طازج." },
+        { "name_en": "Guava with Milk", "name_ar": "جوافة بلبن", "price": 70, "description_en": "Guava juice with milk.", "description_ar": "عصير جوافة بالحليب." },
+        { "name_en": "Banana with Milk", "name_ar": "موز بلبن", "price": 55, "description_en": "Banana milkshake.", "description_ar": "ميلك شيك موز." },
+        { "name_en": "Dates with Milk", "name_ar": "بلح بلبن", "price": 60, "description_en": "Dates and milk drink.", "description_ar": "مشروب التمر والحليب." },
+        { "name_en": "Watermelon Juice", "name_ar": "بطيخ", "price": 55, "description_en": "Fresh watermelon juice.", "description_ar": "عصير بطيخ طازج." },
+        { "name_en": "Kiwi Juice", "name_ar": "كيوي", "price": 90, "description_en": "Fresh kiwi juice.", "description_ar": "عصير كيوي طازج." },
+        { "name_en": "Lemon Juice", "name_ar": "ليمون", "price": 45, "description_en": "Fresh lemon juice.", "description_ar": "عصير ليمون طازج." },
+        { "name_en": "Lemon Mint", "name_ar": "ليمون نعناع", "price": 55, "description_en": "Lemon and mint juice.", "description_ar": "عصير ليمون ونعناع." },
+        { "name_en": "Avocado Juice", "name_ar": "افوكادو", "price": 100, "description_en": "Fresh avocado juice.", "description_ar": "عصير أفوكادو طازج." },
+        { "name_en": "Peach Juice", "name_ar": "خوخ", "price": 65, "description_en": "Fresh peach juice.", "description_ar": "عصير خوخ طازج." },
+        { "name_en": "Plum Juice", "name_ar": "برقوق", "price": 80, "description_en": "Fresh plum juice.", "description_ar": "عصير برقوق طازج." },
+        { "name_en": "Iced Tea", "name_ar": "ايس تي", "price": 65, "description_en": "Chilled flavored iced tea.", "description_ar": "شاي مثلج بنكهة الفواكه." },
+        { "name_en": "Prickly Pear", "name_ar": "تين شوكي", "price": 65, "description_en": "Fresh prickly pear juice.", "description_ar": "عصير تين شوكي طازج." }
+      ]
+    },
+    {
+      "category_en": "Mojito", "category_ar": "موهيتو",
+      "items": [
+        { "name_en": "Classic Mojito (Flavors: Strawberry, Red Berry, Berry, Passion Fruit, Mix Berry, Blue Hawaii, Hawaii, Blue Lemon, Cherry, Green Apple)", "name_ar": "موهيتو كلاسيك (النكهات: فراولة - توت أحمر - بيري - باشن فروت - ميكس بيري - بلو هاواي - هاواي - ليمون أزرق - كرز - تفاح أخضر)", "price": 85, "description_en": "Sparkling mojito with fruit.", "description_ar": "موهيتو فوار مع فواكه." },
+        { "name_en": "Special Mojito (Kiwi, Pineapple, Peach, Tangerine, Red Berry) (New)", "name_ar": "موهيتو خاص (كيوي - أناناس - خوخ - يوسفي - توت أحمر) (جديد)", "price": 125, "description_en": "Premium mojito blend.", "description_ar": "مزيج موهيتو فاخر." },
+        { "name_en": "Cherry Cola / Grenadine Mojito (New)", "name_ar": "شيري كولا - جراندينا (جديد)", "price": 130, "description_en": "Cherry cola mojito.", "description_ar": "موهيتو شيري كولا." }
+      ]
+    },
+    {
+      "category_en": "Smoothie", "category_ar": "سموثي",
+      "items": [
+        { "name_en": "Smoothie (Mango, Berry, Watermelon, Lemon Mint, Prickly Pear)", "name_ar": "سموثي (مانجو - بيري - بطيخ - ليمون بالنعناع - تين شوكي)", "price": 75, "description_en": "Thick fruit smoothie.", "description_ar": "سموثي فواكه سميك." },
+        { "name_en": "Smoothie (Mango Passion, Mango Peach, Mango Pineapple, Strawberry Passion, Kiwi)", "name_ar": "سموثي (مانجو باشن - مانجو خوخ - مانجو أناناس - فراولة باشن - كيوي)", "price": 85, "description_en": "Tropical fruit smoothie.", "description_ar": "سموثي فواكه استوائي." }
+      ]
+    },
+    {
+      "category_en": "VAYA Tonic", "category_ar": "فايا تونيك",
+      "items": [
+        { "name_en": "VAYA Tonic (New)", "name_ar": "فايا تونيك (جديد)", "price": 99, "description_en": "Signature tonic water drink.", "description_ar": "مشروب ماء التونيك الخاص." }
+      ]
+    },
+    {
+      "category_en": "Ice Cream", "category_ar": "آيس كريم",
+      "items": [
+        { "name_en": "Ice Cream - 2 Scoops", "name_ar": "ايس كريم 2 بولة", "price": 40, "description_en": "Two scoops of ice cream.", "description_ar": "كرتان من الآيس كريم." },
+        { "name_en": "Ice Cream - 3 Scoops", "name_ar": "ايس كريم 3 بولة", "price": 50, "description_en": "Three scoops of ice cream.", "description_ar": "ثلاث كرات من الآيس كريم." },
+        { "name_en": "Ice Cream - 4 Scoops", "name_ar": "ايس كريم 4 بولة", "price": 70, "description_en": "Four scoops of ice cream.", "description_ar": "أربع كرات من الآيس كريم." }
+      ]
+    },
+    {
+      "category_en": "Waffle & Pancake", "category_ar": "وافل وبانكيك",
+      "items": [
+        { "name_en": "Waffle with Nutella, White Chocolate, or Lotus", "name_ar": "وافل (نوتيلا - وايت شيكولات - لوتس)", "price": 80, "description_en": "Waffle with sweet spread.", "description_ar": "وافل مع صوص حلو." },
+        { "name_en": "Waffle with Pistachio, Hazelnut, or Caramel", "name_ar": "وافل (بستاشيو - بندق - كراميل)", "price": 90, "description_en": "Waffle with premium spread.", "description_ar": "وافل مع صوص فاخر." },
+        { "name_en": "Pancake (6 pieces) with Nutella, White Chocolate, or Lotus", "name_ar": "بانكيك (6 قطع) (نوتيلا - وايت شيكولات - لوتس)", "price": 55, "description_en": "6 mini pancakes.", "description_ar": "6 قطع بانكيك." },
+        { "name_en": "Pancake (6 pieces) with Pistachio, Hazelnut, or Caramel", "name_ar": "بانكيك (6 قطع) (بستاشيو - بندق - كراميل)", "price": 65, "description_en": "6 mini pancakes premium.", "description_ar": "6 قطع بانكيك فاخر." },
+        { "name_en": "Pancake (12 pieces) with Nutella, White Chocolate, or Lotus", "name_ar": "بانكيك (12 قطعة) (نوتيلا - وايت شيكولات - لوتس)", "price": 75, "description_en": "12 mini pancakes.", "description_ar": "12 قطعة بانكيك." },
+        { "name_en": "Pancake (12 pieces) with Pistachio, Hazelnut, or Caramel", "name_ar": "بانكيك (12 قطعة) (بستاشيو - بندق - كراميل)", "price": 85, "description_en": "12 mini pancakes premium.", "description_ar": "12 قطعة بانكيك فاخر." }
+      ]
+    },
+    {
+      "category_en": "Desserts", "category_ar": "حلويات",
+      "items": [
+        { "name_en": "Tiramisu", "name_ar": "تيراميسو", "price": 90, "description_en": "Classic Italian dessert.", "description_ar": "حلوى إيطالية كلاسيكية." },
+        { "name_en": "Carrot Cake (New)", "name_ar": "كاروت كيك (جديد)", "price": 90, "description_en": "Spiced carrot cake.", "description_ar": "كيك الجزر المتبل." },
+        { "name_en": "Molten Cake", "name_ar": "مولتن كيك", "price": 110, "description_en": "Warm chocolate cake.", "description_ar": "كيك شوكولاتة دافئ." },
+        { "name_en": "Molten Cake with Ice Cream", "name_ar": "مولتن كيك ايس كريم", "price": 135, "description_en": "Molten cake with ice cream.", "description_ar": "مولتن كيك مع آيس كريم." },
+        { "name_en": "Nutella Cheesecake", "name_ar": "تشيز كيك نوتيلا", "price": 80, "description_en": "Cheesecake with Nutella.", "description_ar": "تشيز كيك بالنوتيلا." },
+        { "name_en": "Lotus Cheesecake", "name_ar": "تشيز كيك لوتس", "price": 80, "description_en": "Cheesecake with Lotus.", "description_ar": "تشيز كيك باللوتس." },
+        { "name_en": "Cheesecake (Berry, Caramel, Pistachio, Red Berry, Mix Berry, Strawberry)", "name_ar": "تشيز كيك (بيري - كراميل - بستاشيو - توت أحمر - ميكس بيري - فراولة)", "price": 90, "description_en": "Classic cheesecake.", "description_ar": "تشيز كيك كلاسيك." }
+      ]
+    },
+    {
+      "category_en": "Add-On", "category_ar": "الإضافات",
+      "items": [
+        { "name_en": "Espresso Shot", "name_ar": "اسبريسو شوت", "price": 40, "description_en": "Extra espresso shot.", "description_ar": "جرعة إسبريسو إضافية." },
+        { "name_en": "Flavor", "name_ar": "نكهة سيرب", "price": 30, "description_en": "Flavor syrup.", "description_ar": "سيرب نكهة." },
+        { "name_en": "Sauce", "name_ar": "صوص إضافي", "price": 30, "description_en": "Extra sauce.", "description_ar": "صوص إضافي." },
+        { "name_en": "Pistachio", "name_ar": "بستاشيو", "price": 40, "description_en": "Pistachio spread.", "description_ar": "صوص فستق." },
+        { "name_en": "Condensed Milk", "name_ar": "حليب مكثف", "price": 30, "description_en": "Condensed milk.", "description_ar": "حليب مكثف." },
+        { "name_en": "Whipped Cream", "name_ar": "كريمة مخفوقة", "price": 30, "description_en": "Whipped cream.", "description_ar": "كريمة مخفوقة." },
+        { "name_en": "Frappe Powder", "name_ar": "بودرة فرابيه", "price": 35, "description_en": "Frappe powder.", "description_ar": "بودرة فرابيه." },
+        { "name_en": "Nuts", "name_ar": "مكسرات", "price": 25, "description_en": "Nut topping.", "description_ar": "مكسرات." },
+        { "name_en": "Honey", "name_ar": "عسل", "price": 20, "description_en": "Natural honey.", "description_ar": "عسل طبيعي." },
+        { "name_en": "Boba", "name_ar": "بوبا", "price": 30, "description_en": "Boba pearls.", "description_ar": "حبوب بوبا." }
+      ]
+    },
+    {
+      "category_en": "Bakery", "category_ar": "مخبوزات",
+      "items": [
+        { "name_en": "Croissant", "name_ar": "كرواسون", "price": 55, "description_en": "Butter croissant.", "description_ar": "كرواسون بالزبدة." },
+        { "name_en": "Cheddar Cheese Croissant", "name_ar": "كرواسون بالجبنة الشيدر", "price": 85, "description_en": "Croissant with cheddar.", "description_ar": "كرواسون بالشيدر." },
+        { "name_en": "Mixed Cheese Croissant", "name_ar": "كرواسون مكس جبن", "price": 90, "description_en": "Croissant with mixed cheese.", "description_ar": "كرواسون بجبن مشكل." },
+        { "name_en": "Smoked Turkey Croissant", "name_ar": "كرواسون تركي المدخن", "price": 95, "description_en": "Croissant with smoked turkey.", "description_ar": "كرواسون بالتركي المدخن." },
+        { "name_en": "Beef Croissant", "name_ar": "كرواسون بيف", "price": 85, "description_en": "Croissant with beef.", "description_ar": "كرواسون باللحم." }
+      ]
+    }
+  ]
+};
+
+    // Flatten the nested JSON into a single array for easy filtering
+    let flatMenu = [];
+    if (rawVayaData && rawVayaData.menu) {
+        rawVayaData.menu.forEach(cat => {
+            cat.items.forEach(item => {
+                // Auto-generate tags based on name/description to make filters work
+                let tags = [];
+                let searchString = (item.name_en + " " + item.description_en + " " + cat.category_en).toLowerCase();
+                
+                if (searchString.includes('iced') || searchString.includes('cold') || searchString.includes('frappe') || searchString.includes('mojito') || searchString.includes('smoothie') || searchString.includes('ice cream')) tags.push('Cold');
+                if (searchString.includes('hot') || cat.category_en.includes('Hot')) tags.push('Hot');
+                if (searchString.includes('sweet') || searchString.includes('caramel') || searchString.includes('nutella') || searchString.includes('chocolate') || searchString.includes('lotus') || cat.category_en.includes('Dessert') || cat.category_en.includes('Waffle') || cat.category_en.includes('Ice Cream') || cat.category_en.includes('Milkshake')) tags.push('Sweet');
+                if (searchString.includes('juice') || searchString.includes('fruit') || searchString.includes('berry') || searchString.includes('mango') || cat.category_en.includes('Refresher') || cat.category_en.includes('Cocktail') || cat.category_en.includes('Smoothie')) tags.push('Fruity');
+                if (searchString.includes('coffee') || searchString.includes('espresso') || searchString.includes('latte') || searchString.includes('mocha') || searchString.includes('cappuccino') || searchString.includes('macchiato') || cat.category_en.includes('Coffee')) tags.push('Coffee');
+                if (searchString.includes('milk') || searchString.includes('latte') || searchString.includes('creamy') || searchString.includes('shake')) tags.push('Creamy');
+
+                // Remove duplicates
+                tags = [...new Set(tags)];
+
+                flatMenu.push({
+                    id: "item_" + Math.random().toString(36).substr(2, 9),
+                    name_en: item.name_en,
+                    name_ar: item.name_ar,
+                    price: item.price,
+                    desc_en: item.description_en,
+                    desc_ar: item.description_ar,
+                    category_en: cat.category_en,
+                    category_ar: cat.category_ar,
+                    tags: tags,
+                    image: getItemImage(item.name_en, cat.category_en)
+                });
+            });
+        });
     }
 
-    let subject = "cafe drink";
+    // 🖼️ VALIDATED IMAGE MAPPING ENGINE
+    function getItemImage(name, category) {
+        const n = name.toLowerCase();
+        const c = category.toLowerCase();
+        
+        // Specific items matching
+        if (n.includes('espresso') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('turkish')) return 'https://images.unsplash.com/photo-1595144479298-8b0809929c0a?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cappuccino') || n.includes('flat white') || n.includes('cortado')) return 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('latte') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('mocha') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('hot chocolate') || n.includes('sahlab')) return 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('tea') && !n.includes('iced')) return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80';
+        
+        // Iced & Cold
+        if (n.includes('iced') || n.includes('ice ') || n.includes('cold')) {
+            if (n.includes('matcha')) return 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80';
+            if (n.includes('spanish')) return 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?auto=format&fit=crop&w=600&q=80';
+            if (n.includes('americano')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80';
+            return 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80'; // Generic iced coffee
+        }
+        
+        // Matcha
+        if (n.includes('matcha')) return 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80';
+        
+        // Boba
+        if (n.includes('boba')) return 'https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=600&q=80';
+        
+        // Frappe / Frappuccino
+        if (n.includes('frappe') || n.includes('frappuccino')) return 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80';
+        
+        // Milkshake
+        if (n.includes('milkshake')) return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80';
+        
+        // Cocktail, Mojito, Smoothie
+        if (n.includes('mojito') || n.includes('cocktail')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('smoothie')) return 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80';
+        
+        // Juices
+        if (n.includes('juice') || n.includes('lemonade') || n.includes('prickly pear')) return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('mango')) return 'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('strawberry')) return 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80';
+        
+        // Desserts & Bakery
+        if (n.includes('ice cream') || n.includes('affogato')) return 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('waffle')) return 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('pancake')) return 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cheesecake')) return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('tiramisu')) return 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cake') || n.includes('brownie')) return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('croissant')) return 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('cookie')) return 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80';
+        if (n.includes('turkey') || n.includes('beef') || n.includes('cheese')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80';
 
-    // 1. Bakery and food — check before drink keywords
-    if (n.includes("croissant")) {
-        subject = n.includes("beef") ? "beef filled croissant pastry" :
-                  n.includes("turkey") ? "smoked turkey croissant sandwich" :
-                  n.includes("cheddar") || n.includes("cheese")
-                      ? "cheese croissant pastry" : "butter croissant pastry";
-    } else if (n.includes("waffle")) {
-        subject = "waffle dessert with chocolate topping";
-        if (n.includes("pistachio")) subject = "pistachio waffle dessert";
-        if (n.includes("caramel")) subject = "caramel waffle dessert";
-    } else if (n.includes("pancake")) {
-        subject = n.includes("pistachio") ? "pancakes pistachio topping" :
-                  n.includes("caramel") ? "pancakes caramel topping" :
-                  "mini pancakes chocolate topping";
-    } else if (n.includes("tiramisu")) {
-        subject = "tiramisu dessert cocoa mascarpone";
-    } else if (n.includes("carrot cake")) {
-        subject = "carrot cake cream cheese frosting";
-    } else if (n.includes("molten cake")) {
-        subject = n.includes("ice cream")
-            ? "molten chocolate lava cake vanilla ice cream"
-            : "molten chocolate lava cake";
-    } else if (n.includes("cheesecake")) {
-        subject = n.includes("lotus") ? "Lotus Biscoff cheesecake" :
-                  n.includes("nutella") ? "Nutella chocolate cheesecake" :
-                  n.includes("pistachio") ? "pistachio cheesecake dessert" :
-                  "berry cheesecake slice";
-    } else if (n.includes("ice cream")) {
-        subject = "ice cream scoops in dessert bowl";
-    } else if (n.includes("cake") || n.includes("brownie")) {
-        subject = "slice of chocolate cake dessert";
-
-    // 2. Tea and matcha — before generic iced drinks
-    } else if (n.includes("matcha")) {
-        subject = n.includes("strawberry") ? "iced strawberry matcha latte" :
-                  n.includes("blueberry") ? "iced blueberry matcha latte" :
-                  n.includes("cherry") ? "iced cherry matcha latte" :
-                  n.includes("mango") ? "iced mango matcha latte" :
-                  n.includes("berry") ? "iced mixed berry matcha latte" :
-                  "green matcha latte in glass";
-    } else if (n.includes("boba")) {
-        subject = "bubble tea boba tapioca pearls";
-    } else if (n.includes("green tea")) {
-        subject = "cup of green tea";
-    } else if (n.includes("fruit tea")) {
-        subject = "hot fruit tea with berries";
-    } else if (n.includes("tea with milk")) {
-        subject = "black milk tea in glass";
-    } else if (n.includes("tea") || n.includes("herbs")) {
-        subject = n.includes("iced") ? "iced tea in glass with lemon" :
-                  "hot black tea in clear cup";
-
-    // 3. Juices and fruit-based drinks
-    } else if (n.includes("guava")) {
-        subject = n.includes("milk")
-            ? "creamy guava milk drink"
-            : "fresh guava juice";
-    } else if (n.includes("banana")) {
-        subject = "banana milkshake in glass";
-    } else if (n.includes("dates")) {
-        subject = "dates milk smoothie";
-    } else if (n.includes("watermelon")) {
-        subject = "fresh watermelon juice";
-    } else if (n.includes("kiwi")) {
-        subject = "fresh green kiwi juice";
-    } else if (n.includes("avocado")) {
-        subject = "creamy avocado juice";
-    } else if (n.includes("prickly pear")) {
-        subject = "prickly pear fruit juice";
-    } else if (n.includes("lemon mint")) {
-        subject = "lemon mint juice in glass";
-    } else if (n.includes("lemon")) {
-        subject = "fresh lemon juice";
-    } else if (n.includes("mango")) {
-        subject = n.includes("passion") ? "mango passion fruit drink" :
-                  n.includes("peach") ? "mango peach smoothie" :
-                  n.includes("pineapple") ? "mango pineapple juice" :
-                  "fresh mango juice in glass";
-    } else if (n.includes("strawberry")) {
-        subject = "fresh strawberry juice drink";
-    } else if (n.includes("peach")) {
-        subject = "fresh peach juice";
-    } else if (n.includes("plum")) {
-        subject = "fresh plum juice";
-    } else if (n.includes("berry")) {
-        subject = "mixed berry fruit drink";
-    } else if (n.includes("pina colada")) {
-        subject = "pineapple coconut pina colada mocktail";
-    } else if (n.includes("smoothie")) {
-        subject = "thick fresh fruit smoothie";
-    } else if (n.includes("mojito")) {
-        subject = n.includes("cherry cola")
-            ? "cherry cola mojito mocktail"
-            : "mint lime sparkling mojito mocktail";
-    } else if (n.includes("cocktail") || n.includes("pink monkey") ||
-               n.includes("velvet green") || n.includes("triple vibe")) {
-        subject = "colorful layered tropical fruit mocktail";
-    } else if (n.includes("tonic")) {
-        subject = "sparkling citrus tonic water mocktail";
-
-    // 4. Milkshakes and blended drinks
-    } else if (n.includes("milkshake")) {
-        subject = n.includes("strawberry") ? "strawberry milkshake" :
-                  n.includes("mango") ? "mango milkshake" :
-                  n.includes("pistachio") ? "pistachio milkshake" :
-                  n.includes("oreo") ? "Oreo cookie milkshake" :
-                  n.includes("caramel") ? "caramel milkshake" :
-                  n.includes("vanilla") ? "vanilla milkshake" :
-                  "thick creamy milkshake in tall glass";
-    } else if (n.includes("frappuccino")) {
-        subject = n.includes("white mocha") ? "white chocolate coffee frappuccino" :
-                  n.includes("mocha") ? "chocolate mocha frappuccino" :
-                  n.includes("caramel") ? "caramel coffee frappuccino" :
-                  "iced blended Spanish latte frappuccino";
-    } else if (n.includes("frappé") || n.includes("frappe")) {
-        subject = n.includes("strawberry") ? "strawberry blended frappe" :
-                  n.includes("berry") ? "mixed berry blended frappe" :
-                  n.includes("coconut") ? "coconut frappe drink" :
-                  n.includes("vanilla") ? "vanilla frappe drink" :
-                  n.includes("mocha") ? "chocolate mocha frappe" :
-                  "caramel blended frappe";
-
-    // 5. Hot chocolate and other hot drinks
-    } else if (n.includes("hot chocolate") || n.includes("marshmallow")) {
-        subject = n.includes("marshmallow") ? "hot chocolate topped with marshmallows" :
-                  n.includes("nuts") ? "hot chocolate with chopped nuts" :
-                  "steaming cup of hot chocolate";
-    } else if (n.includes("sahlab")) {
-        subject = n.includes("nuts") ? "traditional sahlab topped with nuts" :
-                  "creamy traditional sahlab drink";
-    } else if (n.includes("cinnamon milk")) {
-        subject = "warm milk with cinnamon";
-    } else if (n.includes("cider")) {
-        subject = "warm spiced apple cider drink";
-
-    // 6. Coffee — distinguish espresso, Turkish, and milk-based coffee
-    } else if (n.includes("turkish")) {
-        subject = "traditional Turkish coffee in small cup";
-    } else if (n.includes("affogato")) {
-        subject = "vanilla ice cream with espresso affogato";
-    } else if (n.includes("americano")) {
-        subject = n.includes("ice") ? "iced Americano black coffee" :
-                  "hot Americano black coffee";
-    } else if (n.includes("espresso")) {
-        subject = "espresso shot in small espresso cup";
-    } else if (n.includes("macchiato")) {
-        subject = n.includes("caramel")
-            ? "caramel macchiato layered coffee"
-            : "espresso macchiato with milk foam";
-    } else if (n.includes("cortado")) {
-        subject = "cortado espresso with steamed milk";
-    } else if (n.includes("flat white")) {
-        subject = "flat white coffee latte art";
-    } else if (n.includes("cappuccino")) {
-        subject = "cappuccino coffee with milk foam";
-    } else if (n.includes("latte")) {
-        subject = n.includes("pistachio") ? "pistachio latte drink" :
-                  n.includes("lotus") ? "Lotus Biscoff latte" :
-                  n.includes("nutella") ? "Nutella chocolate latte" :
-                  n.includes("salted caramel") ? "salted caramel latte" :
-                  n.includes("caramel") ? "caramel latte coffee" :
-                  n.includes("spanish") ? "Spanish latte with condensed milk" :
-                  n.includes("mocha") ? "mocha latte chocolate coffee" :
-                  "coffee latte in glass";
-    } else if (n.includes("mocha")) {
-        subject = "chocolate mocha coffee drink";
-    } else if (n.includes("nescafe")) {
-        subject = "instant coffee in mug";
-    } else if (n.includes("coffee")) {
-        subject = n.includes("hazelnut")
-            ? "hazelnut coffee in cup"
-            : "freshly brewed coffee in cup";
-
-    // 7. Add-ons
-    } else if (n.includes("pistachio")) {
-        subject = "pistachio cream spread in bowl";
-    } else if (n.includes("boba")) {
-        subject = "black tapioca boba pearls";
-    } else if (n.includes("honey")) {
-        subject = "golden honey in small glass jar";
-    } else if (n.includes("nuts")) {
-        subject = "mixed nuts in small bowl";
-    } else if (n.includes("whipped cream")) {
-        subject = "whipped cream in bowl";
-    } else if (n.includes("condensed milk")) {
-        subject = "sweet condensed milk in glass";
-    } else if (n.includes("sauce") || n.includes("flavor")) {
-        subject = "coffee syrup and dessert sauce bottles";
-    } else if (n.includes("powder")) {
-        subject = "frappe powder in small bowl";
+        // Generic Fallbacks based on category
+        if (c.includes('hot')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('cold') || c.includes('iced')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('bakery')) return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('dessert')) return 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80';
+        if (c.includes('coffee')) return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80';
+        
+        return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80'; // Ultimate default
     }
 
-    // Query-based images, with a deterministic product-specific lock.
-    // Each product gets a stable image request rather than a generic
-    // coffee fallback. An internet connection is required.
-    const lock = makeLock(name + "|" + category);
-    const tags = subject.replace(/[^a-zA-Z0-9 ]/g, " ")
-                        .trim()
-                        .replace(/\s+/g, ",");
+    // ==========================================
+    // 2. STATE MANAGEMENT (Cart & Language)
+    // ==========================================
+    let currentLang = 'en';
+    let cart = []; // Array to hold { item, quantity }
 
-    return `https://loremflickr.com/600/400/${tags}?lock=${lock}`;
-}
+    const translations = {
+        en: {
+            budget: "Max Budget", mood: "What are you in the mood for?", viewMenu: "📖 View Full Menu Image", 
+            recommended: "Recommended for you", viewDetails: "View Details", addList: "❤️ Add to My List", 
+            added: "✓ Added to List!", myList: "My List", total: "Total:", emptyCart: "Your list is empty. Add some items!", 
+            close: "Close", fullMenu: "Full Menu", noResults: "No items match your filters."
+        },
+        ar: {
+            budget: "أقصى ميزانية", mood: "ما هو مزاجك الآن؟", viewMenu: "📖 عرض صورة المنيو كاملة", 
+            recommended: "مقترح لك", viewDetails: "عرض التفاصيل", addList: "❤️ أضف إلى قائمتي", 
+            added: "✓ تمت الإضافة!", myList: "قائمتي", total: "الإجمالي:", emptyCart: "قائمتك فارغة. أضف بعض العناصر!", 
+            close: "إغلاق", fullMenu: "المنيو كاملة", noResults: "لا توجد عناصر تطابق بحثك."
+        }
+    };
+
+    // ==========================================
+    // 3. DOM ELEMENTS
+    // ==========================================
+    const budgetSlider = document.getElementById('budget-slider');
+    const budgetDisplay = document.getElementById('budget-display');
+    const menuContainer = document.getElementById('menu-items');
+    const linaMessage = document.getElementById('lina-message');
+    const modal = document.getElementById('detail-modal');
+    const modalContent = document.getElementById('modal-content-body');
+    const cartModal = document.getElementById('cart-modal');
+
+    // ==========================================
+    // 4. LANGUAGE LOGIC
+    // ==========================================
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'ar' : 'en';
+        document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = currentLang;
+        document.getElementById('lang-toggle').innerText = currentLang === 'en' ? 'AR' : 'EN';
+        
+        // Update static UI text
+        const t = translations[currentLang];
+        document.getElementById('lbl-budget').innerText = t.budget;
+        document.getElementById('lbl-mood').innerText = t.mood;
+        document.getElementById('btn-full-menu').innerText = t.viewMenu;
+        document.getElementById('results-title').innerText = t.recommended;
+        document.getElementById('cart-title').innerText = t.myList;
+        document.getElementById('lbl-total').innerText = t.total;
+        document.getElementById('btn-close-cart').innerText = t.close;
+        document.getElementById('full-menu-title').innerText = t.fullMenu;
+
+        // Update Mood Pills text
+        document.querySelectorAll('.mood-pill').forEach(checkbox => {
+            const label = checkbox.nextElementSibling;
+            label.innerText = currentLang === 'en' ? label.getAttribute('data-en') : label.getAttribute('data-ar');
+        });
+
+        filterMenu(); // Re-render menu
+        renderCart(); // Re-render cart
+    }
+
+    // ==========================================
+    // 5. RENDER FUNCTIONS
+    // ==========================================
+    function renderMenu(items) {
+        menuContainer.innerHTML = '';
+        const t = translations[currentLang];
+        
+        if (items.length === 0) {
+            menuContainer.innerHTML = `<div class="no-results"><span>😔</span>${t.noResults}</div>`;
+            return;
+        }
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            
+            let tagsHtml = '';
+            item.tags.slice(0, 3).forEach(tag => {
+                tagsHtml += `<span class="tag">${tag}</span>`;
+            });
+
+            const name = currentLang === 'en' ? item.name_en : item.name_ar;
+            const desc = currentLang === 'en' ? item.desc_en : item.desc_ar;
+
+            card.innerHTML = `
+                <img src="${item.image}" alt="${name}" class="item-image" loading="lazy">
+                <div class="item-content">
+                    <div class="item-header">
+                        <div class="item-name">${name}</div>
+                        <div class="item-price">${item.price} EGP</div>
+                    </div>
+                    <div class="item-tags">${tagsHtml}</div>
+                    <p class="item-desc">${desc}</p>
+                    <button class="btn-view" onclick="openDetails('${item.id}')">${t.viewDetails}</button>
+                </div>
+            `;
+            menuContainer.appendChild(card);
+        });
+    }
+
+    function updateLinaMessage(items, budget) {
+        let message = "";
+        const t = translations[currentLang];
+        
+        if (items.length === 0) {
+            message = currentLang === 'en' 
+                ? `Oh no! I couldn't find anything matching those preferences under ${budget} EGP. 😔 Try adjusting your filters!`
+                : `للأسف! لم أجد أي شيء يطابق هذه التفضيلات تحت ${budget} جنيه. 😔 جرب تغيير الفلاتر!`;
+        } else {
+            message = currentLang === 'en'
+                ? `Great! I found ${items.length} options for you under ${budget} EGP. Here are my top picks!`
+                : `رائع! وجدت ${items.length} خيارات لك تحت ${budget} جنيه. إليك أفضل الاقتراحات!`;
+        }
+
+        linaMessage.innerHTML = message;
+    }
+
+    // ==========================================
+    // 6. FILTER LOGIC
+    // ==========================================
+    function filterMenu() {
+        const maxBudget = parseInt(budgetSlider.value);
+        const selectedMoods = Array.from(document.querySelectorAll('.mood-pill:checked')).map(cb => cb.value);
+        budgetDisplay.textContent = `${maxBudget} EGP`;
+
+        const filteredItems = flatMenu.filter(item => {
+            // Budget Check
+            if (item.price > maxBudget) return false;
+
+            // Mood Check (Tags) - Must match ALL selected moods
+            if (selectedMoods.length > 0) {
+                const hasAllMoods = selectedMoods.every(mood => item.tags.includes(mood));
+                if (!hasAllMoods) return false;
+            }
+            return true;
+        });
+
+        renderMenu(filteredItems);
+        updateLinaMessage(filteredItems, maxBudget);
+    }
+
+    // ==========================================
+    // 7. MODAL & CART LOGIC
+    // ==========================================
+    window.openDetails = function(id) {
+        const item = flatMenu.find(i => i.id === id);
+        if (!item) return;
+
+        const t = translations[currentLang];
+        const name = currentLang === 'en' ? item.name_en : item.name_ar;
+        const desc = currentLang === 'en' ? item.desc_en : item.desc_ar;
+        const cat = currentLang === 'en' ? item.category_en : item.category_ar;
+        let tagsHtml = item.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+
+        modalContent.innerHTML = `
+            <div class="modal-drag-handle"></div>
+            <img src="${item.image}" alt="${name}" class="modal-image">
+            <h2 class="modal-title">${name}</h2>
+            <div class="modal-price">${item.price} EGP</div>
+            <div class="item-tags" style="margin-bottom:15px;">${tagsHtml}</div>
+            
+            <p class="modal-desc">${desc}</p>
+            
+            <div class="modal-section-title">${cat}</div>
+            
+            <button class="btn-add" id="btn-add-cart" onclick="addToCart('${item.id}')">${t.addList}</button>
+        `;
+
+        modal.classList.add('active');
+    }
+
+    window.addToCart = function(id) {
+        const item = flatMenu.find(i => i.id === id);
+        if (!item) return;
+
+        const existing = cart.find(c => c.item.id === id);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ item: item, quantity: 1 });
+        }
+
+        // Update button UI
+        const btn = document.getElementById('btn-add-cart');
+        if(btn) {
+            btn.innerHTML = translations[currentLang].added;
+            btn.classList.add('added');
+        }
+
+        updateCartBadge();
+        setTimeout(() => { closeModal('detail-modal'); }, 800);
+    }
+
+    function updateCartBadge() {
+        const count = cart.reduce((total, c) => total + c.quantity, 0);
+        document.getElementById('cart-count').innerText = count;
+    }
+
+    window.openCart = function() {
+        renderCart();
+        cartModal.classList.add('active');
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cart-items-container');
+        const totalContainer = document.getElementById('cart-total-container');
+        const totalPrice = document.getElementById('cart-total-price');
+        const t = translations[currentLang];
+
+        if (cart.length === 0) {
+            container.innerHTML = `<div class="empty-cart">${t.emptyCart}</div>`;
+            totalContainer.style.display = 'none';
+            return;
+        }
+
+        let html = '';
+        let total = 0;
+
+        cart.forEach(c => {
+            const name = currentLang === 'en' ? c.item.name_en : c.item.name_ar;
+            const itemTotal = c.item.price * c.quantity;
+            total += itemTotal;
+
+            html += `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-title">${name}</span>
+                        <span class="cart-item-price">${c.item.price} EGP x ${c.quantity} = ${itemTotal} EGP</span>
+                    </div>
+                    <div class="cart-controls">
+                        <button class="qty-btn" onclick="updateQuantity('${c.item.id}', -1)">-</button>
+                        <span>${c.quantity}</span>
+                        <button class="qty-btn" onclick="updateQuantity('${c.item.id}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        totalContainer.style.display = 'flex';
+        totalPrice.innerText = `${total} EGP`;
+    }
+
+    window.updateQuantity = function(id, change) {
+        const existing = cart.find(c => c.item.id === id);
+        if (!existing) return;
+
+        existing.quantity += change;
+        if (existing.quantity <= 0) {
+            cart = cart.filter(c => c.item.id !== id);
+        }
+        updateCartBadge();
+        renderCart();
+    }
+
+    window.closeModal = function(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    window.openFullMenu = function() {
+        document.getElementById('full-menu-modal').classList.add('active');
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+    });
+
+    // Event Listeners
+    budgetSlider.addEventListener('input', filterMenu);
+    // Listen for changes on any mood pill
+    document.querySelectorAll('.mood-pill').forEach(cb => {
+        cb.addEventListener('change', filterMenu);
+    });
+
+    // Initial Render
+    filterMenu();
+</script>
+</body>
+</html>
